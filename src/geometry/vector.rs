@@ -1,3 +1,4 @@
+use crate::geometry::nearly::{nearly_equal, nearly_zero};
 use crate::geometry::quad::AsQuad;
 use auto_ops::impl_op_ex;
 use core::fmt;
@@ -6,7 +7,7 @@ pub struct Vector {
     pub x: f64,
     pub y: f64,
     pub z: f64,
-    pub w: f64,
+    w: f64,
 }
 
 pub const VEC_0: Vector = Vector {
@@ -70,26 +71,49 @@ impl fmt::Debug for Vector {
 
 impl Vector {
     pub fn new(x: f64, y: f64, z: f64) -> Vector {
-        Vector { x, y, z, w: 0.0 }
+        Vector { x, y, z, w: 0. }
+    }
+
+    pub fn unit(self) -> Vector {
+        let len = self.length();
+        Vector::new(self.x / len, self.y / len, self.z / len)
+    }
+
+    pub fn get_w(&self) -> f64 {
+        self.w
+    }
+
+    pub fn square_length(&self) -> f64 {
+        self.x * self.x + self.y * self.y + self.z * self.z
     }
 
     pub fn length(&self) -> f64 {
-        (self.x * self.x + self.y * self.y + self.z * self.z).sqrt()
+        self.square_length().sqrt()
     }
 
-    pub fn unit(&self) -> Vector {
-        let l = self.length();
-        Vector::new(self.x / l, self.y / l, self.z / l)
-    }
+    pub fn normalize(&mut self) -> &mut Vector {
+        let len = self.length();
 
-    pub fn unit_in_place(&mut self) -> &mut Vector {
-        let l = self.length();
-
-        self.x /= l;
-        self.y /= l;
-        self.z /= l;
+        self.x /= len;
+        self.y /= len;
+        self.z /= len;
 
         self
+    }
+
+    pub fn nearly_equal(&self, v: &Vector) -> bool {
+        nearly_equal(self.x, v.x)
+            && nearly_equal(self.y, v.y)
+            && nearly_equal(self.z, v.z)
+            && nearly_equal(self.w, v.w)
+    }
+
+    pub fn is_normalized(&self) -> bool {
+        nearly_equal(self.square_length(), 1.)
+    }
+
+    pub fn is_normal_to(&self, v: &Vector) -> bool {
+        nearly_zero(self * v)
     }
 }
 
@@ -168,8 +192,8 @@ mod tests {
         assert!(p.x == 2. && p.y == 0. && p.z == 1. && p.w == 0.);
 
         let a_t = &a + &p;
-        assert!(a_t.x == b.x && a_t.y == b.y && a_t.z == b.z && a_t.w == 1.);
-        assert!(a_again.x == a.x && a_again.y == a.y && a_again.z == a.z && a_again.w == 1.);
+        assert!(a_t.x == b.x && a_t.y == b.y && a_t.z == b.z && a_t.get_w() == 1.);
+        assert!(a_again.x == a.x && a_again.y == a.y && a_again.z == a.z && a_again.get_w() == 1.);
     }
 
     #[test]
@@ -180,7 +204,7 @@ mod tests {
         assert!(p.x == 2. && p.y == 0. && p.z == 1. && p.w == 0.);
 
         a += &p;
-        assert!(a.x == b.x && a.y == b.y && a.z == b.z && a.w == 1.);
+        assert!(a.x == b.x && a.y == b.y && a.z == b.z && a.get_w() == 1.);
     }
 
     #[test]
@@ -189,7 +213,7 @@ mod tests {
         let v = Vector::new(3., 2., 4.);
         let b = &a + &v;
 
-        assert!(b.x == 4. && b.y == 4. && b.z == 7. && b.w == 1.);
+        assert!(b.x == 4. && b.y == 4. && b.z == 7. && b.get_w() == 1.);
         assert!(v.x == 3.);
     }
 
@@ -199,7 +223,7 @@ mod tests {
         let v = Vector::new(3., 2., 4.);
         a += &v;
 
-        assert!(a.x == 4. && a.y == 4. && a.z == 7. && a.w == 1.);
+        assert!(a.x == 4. && a.y == 4. && a.z == 7. && a.get_w() == 1.);
         assert!(v.x == 3.);
     }
 
@@ -236,14 +260,14 @@ mod tests {
         let v = Vector::new(12., 6., -5.);
         let u = v.unit();
 
-        assert!((u.length() - 1.).abs() < 0.0001);
+        assert!(u.is_normalized());
     }
 
     #[test]
     fn check_unit_2() {
         let mut v = Vector::new(12., 6., -5.);
-        v.unit_in_place();
+        v.normalize();
 
-        assert!((v.length() - 1.).abs() < 0.0001);
+        assert!(v.is_normalized());
     }
 }

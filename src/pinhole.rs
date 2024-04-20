@@ -7,9 +7,14 @@ pub struct Pinhole {
 }
 
 impl Pinhole {
-    pub fn build(location: Point, mut w: Vector) -> Pinhole {
-        w.unit_in_place();
-        let v = (1. / (1. - w.y * w.y).sqrt()) * (&J - w.y * &w);
+    pub fn build(location: Point, w: Vector) -> Result<Pinhole, &'static str> {
+        assert!(w.is_normalized());
+        assert!(!w.nearly_equal(&J));
+
+        let n = &J - (w.y * &w);
+        let inv_len_n = 1. / n.length();
+
+        let v = inv_len_n * n;
         let u = &v ^ &w;
 
         let m1 = Matrix::from_columns(&u, &v, &w, &location);
@@ -35,11 +40,11 @@ impl Pinhole {
             &Quad::new(0., 0., 0., 1.),
         );
 
-        Pinhole {
-            cs: Cs::build(location, u, v, w),
+        Ok(Pinhole {
+            cs: Cs::build(location, u, v, w)?,
             m1,
             m2,
-        }
+        })
     }
 }
 
@@ -50,23 +55,22 @@ mod tests {
 
     #[test]
     fn cam_1() {
-        let _ = Pinhole::build(Point::new(1., 2., 3.), Vector::new(2., 2., 2.));
-        let _ = Pinhole::build(Point::new(1., 2., 3.), Vector::new(-2., 1.2, 25.));
-        let _ = Pinhole::build(Point::new(1., 2., 3.), Vector::new(12., -23., 0.2));
-        let _ = Pinhole::build(Point::new(1., 2., 3.), Vector::new(2., 0.5, 22.));
+        let _ = Pinhole::build(Point::new(1., 2., 3.), Vector::new(2., 2., 2.).unit());
+        let _ = Pinhole::build(Point::new(1., 2., 3.), Vector::new(-2., 1.2, 25.).unit());
+        let _ = Pinhole::build(Point::new(1., 2., 3.), Vector::new(12., -23., 0.2).unit());
+        let _ = Pinhole::build(Point::new(1., 2., 3.), Vector::new(2., 0.5, 22.).unit());
     }
 
     #[test]
     fn cam_2() {
         let mut theta: f64 = 0.;
-        let step = 0.1;
+        let step = 0.01;
 
         while theta < std::f64::consts::PI {
             let mut phy: f64 = 0.;
             while phy < 2. * std::f64::consts::PI {
-                let w = SphCoord::build(12., theta, phy).into_vector();
-                let p = Pinhole::build(O, w);
-                Cs::check(&p.cs);
+                let w = SphCoord::build(12., theta, phy).into_vector().unit();
+                Pinhole::build(O, w).expect("failed to build pinhole");
                 phy += step;
             }
             theta += step;

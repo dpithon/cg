@@ -57,6 +57,7 @@ mod test {
     #[test]
     fn build_1() {
         let s = SphCoord::build(1., PI, TWO_PI);
+
         assert!(s.rho == 1.);
         assert!(s.theta == PI);
         assert!(s.phy == TWO_PI);

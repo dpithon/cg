@@ -8,7 +8,7 @@ pub struct Point {
     pub x: f64,
     pub y: f64,
     pub z: f64,
-    pub w: f64,
+    w: f64,
 }
 
 pub const O: Point = Point {
@@ -54,6 +54,10 @@ impl Point {
     pub fn new(x: f64, y: f64, z: f64) -> Point {
         Point { x, y, z, w: 1.0 }
     }
+
+    pub fn get_w(&self) -> f64 {
+        self.w
+    }
 }
 
 impl_op_ex!(+ |lhs: &Point, rhs: &Vector| -> Point {
@@ -80,8 +84,30 @@ mod tests {
     use super::*;
 
     #[test]
-    fn point_1() {
+    fn point_o() {
+        let p = O;
+        assert!(p.x == 0. && p.y == 0. && p.z == 0. && p.w == 1.);
+        assert_eq!(p.get_w(), 1.)
+    }
+
+    #[test]
+    fn point_p() {
         let p = Point::new(1., 2., 3.);
         assert!(p.x == 1. && p.y == 2. && p.z == 3. && p.w == 1.);
+        assert_eq!(p.get_w(), 1.)
+    }
+
+    fn as_quad(p: &impl AsQuad) -> (f64, f64, f64, f64) {
+        (p.get_x(), p.get_y(), p.get_z(), p.get_w())
+    }
+
+    #[test]
+    fn point_as_quad() {
+        let p = Point::new(1., 2., 3.);
+        let (x, y, z, w) = as_quad(&p);
+        assert_eq!(p.x, x);
+        assert_eq!(p.y, y);
+        assert_eq!(p.z, z);
+        assert_eq!(p.w, w);
     }
 }
