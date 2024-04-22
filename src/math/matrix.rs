@@ -1,7 +1,7 @@
-use core::fmt;
+use auto_ops::impl_op_ex;
+use std::fmt;
 
 use crate::{AsQuad, Point, Vector};
-use auto_ops::impl_op_ex;
 
 pub struct Matrix {
     m: [[f64; 4]; 4],

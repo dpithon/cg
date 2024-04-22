@@ -1,4 +1,4 @@
-use crate::geometry::{Cs, Matrix, Point, Quad, Vector, J};
+use crate::{Cs, Matrix, Point, Quad, Vector, J};
 
 pub struct Pinhole {
     pub cs: Cs,
@@ -51,11 +51,11 @@ impl Pinhole {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::geometry::{Point, SphCoord, Vector, O};
+    use crate::{Point, SphCoord, Vector, O};
 
     #[test]
     fn cam_1() {
-        let _ = Pinhole::build(Point::new(1., 2., 3.), Vector::new(2., 2., 2.).unit());
+        let _ = Pinhole::build(Point::new(1., 2., 3.), Vector::new(0., 0., 0.).unit());
         let _ = Pinhole::build(Point::new(1., 2., 3.), Vector::new(-2., 1.2, 25.).unit());
         let _ = Pinhole::build(Point::new(1., 2., 3.), Vector::new(12., -23., 0.2).unit());
         let _ = Pinhole::build(Point::new(1., 2., 3.), Vector::new(2., 0.5, 22.).unit());

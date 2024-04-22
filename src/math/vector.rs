@@ -1,7 +1,7 @@
-use crate::geometry::nearly::{nearly_equal, nearly_zero};
-use crate::geometry::quad::AsQuad;
 use auto_ops::impl_op_ex;
-use core::fmt;
+use std::fmt;
+
+use crate::{nearly_equal, nearly_zero, AsQuad};
 
 pub struct Vector {
     pub x: f64,
@@ -167,7 +167,7 @@ impl_op_ex!(^ |lhs: &Vector, rhs: &Vector| -> Vector {
 mod tests {
 
     use super::*;
-    use crate::geometry::point::*;
+    use crate::*;
 
     #[test]
     fn vector_1() {

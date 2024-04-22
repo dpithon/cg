@@ -1,6 +1,7 @@
-use crate::geometry::{Point, Vector};
 use std::f64::consts::PI;
 use std::fmt;
+
+use crate::{Point, Vector};
 
 const TWO_PI: f64 = 2. * PI;
 
@@ -13,6 +14,16 @@ pub struct SphCoord {
 impl fmt::Display for SphCoord {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "SphCoord ({}, {}, {})", self.rho, self.theta, self.phy)
+    }
+}
+
+impl fmt::Debug for SphCoord {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_tuple("")
+            .field(&self.rho)
+            .field(&self.theta)
+            .field(&self.phy)
+            .finish()
     }
 }
 

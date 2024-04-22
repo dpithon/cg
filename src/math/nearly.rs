@@ -2,7 +2,7 @@
 
 use std::f64::{MAX, MIN_POSITIVE};
 
-const EPSILON: f64 = 1e-8;
+const EPSILON: f64 = 1e-7;
 const ABS_TH: f64 = MIN_POSITIVE;
 
 pub fn nearly_equal(a: f64, b: f64) -> bool {

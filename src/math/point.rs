@@ -1,8 +1,7 @@
-use core::fmt;
-
-use crate::geometry::quad::AsQuad;
-use crate::geometry::vector::Vector;
 use auto_ops::impl_op_ex;
+use std::fmt;
+
+use crate::{nearly_equal, AsQuad, Vector};
 
 pub struct Point {
     pub x: f64,
@@ -57,6 +56,13 @@ impl Point {
 
     pub fn get_w(&self) -> f64 {
         self.w
+    }
+
+    pub fn nearly_equal(&self, p: &Point) -> bool {
+        nearly_equal(self.x, p.x)
+            && nearly_equal(self.y, p.y)
+            && nearly_equal(self.z, p.z)
+            && nearly_equal(self.w, p.w)
     }
 }
 
