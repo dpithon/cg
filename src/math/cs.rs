@@ -1,19 +1,23 @@
 use std::fmt;
 
-use crate::{Point, Vector, I, J, K, O};
+use crate::{nearly_equal, Matrix, Point, Quad, Vector, I, ID_MATRIX, J, K, O};
 
 pub struct Cs {
     pub o: Point,
     pub i: Vector,
     pub j: Vector,
     pub k: Vector,
+    pub lcs_to_rcs: Matrix, // local cs to reference cs
+    pub rcs_to_lcs: Matrix, // reference cs to local cs
 }
 
-pub const CS: Cs = Cs {
+pub const STD_CS: Cs = Cs {
     o: O,
     i: I,
     j: J,
     k: K,
+    lcs_to_rcs: ID_MATRIX,
+    rcs_to_lcs: ID_MATRIX,
 };
 
 impl fmt::Display for Cs {
@@ -24,34 +28,81 @@ impl fmt::Display for Cs {
 
 impl Default for Cs {
     fn default() -> Self {
-        CS
+        STD_CS
     }
 }
 
 impl Cs {
-    pub fn build(o: Point, i: Vector, j: Vector, k: Vector) -> Result<Cs, &'static str> {
+    pub fn compute_matrices(o: &Point, i: &Vector, j: &Vector, k: &Vector) -> (Matrix, Matrix) {
+        (
+            Matrix::from_columns(i, j, k, o),
+            Matrix::from_lines(
+                &Quad::new(i.x, i.y, i.z, -i.x * o.x - i.y * o.y - i.z * o.z),
+                &Quad::new(j.x, j.y, j.z, -j.x * o.x - j.y * o.y - j.z * o.z),
+                &Quad::new(k.x, k.y, k.z, -k.x * o.x - k.y * o.y - k.z * o.z),
+                &Quad::new(0., 0., 0., 1.),
+            ),
+        )
+    }
+
+    pub fn check_base(i: &Vector, j: &Vector, k: &Vector) -> Result<(), &'static str> {
         if !i.is_normalized() {
             Err("i is not unit vector")
         } else if !j.is_normalized() {
             Err("j is not unit vector")
         } else if !k.is_normalized() {
             Err("k is not unit vector")
-        } else if !i.is_normal_to(&j) {
-            eprintln!("{} * {}: {:.20}", &i, &j, &i * &j);
+        } else if !i.is_normal_to(j) {
             Err("i is not normal to j")
-        } else if !j.is_normal_to(&k) {
+        } else if !j.is_normal_to(k) {
             Err("j is not normal to k")
-        } else if !k.is_normal_to(&i) {
+        } else if !k.is_normal_to(i) {
             Err("k is not normal to i")
-        } else if !i.nearly_equal(&(&j ^ &k)) {
+        } else if !i.nearly_equal(&(j ^ k)) {
             Err("i != j ^ k")
-        } else if !j.nearly_equal(&(&k ^ &i)) {
+        } else if !j.nearly_equal(&(k ^ i)) {
             Err("j != k ^ i")
-        } else if !k.nearly_equal(&(&i ^ &j)) {
+        } else if !k.nearly_equal(&(i ^ j)) {
             Err("k != i ^ j")
         } else {
-            Ok(Cs { o, i, j, k })
+            Ok(())
         }
+    }
+
+    pub fn new(o: &Point, i: &Vector, j: &Vector, k: &Vector) -> Cs {
+        let (lcs_to_rcs, rcs_to_lcs) = Cs::compute_matrices(o, i, j, k);
+
+        Cs {
+            o: Point::from(o),
+            i: Vector::from(i),
+            j: Vector::from(j),
+            k: Vector::from(k),
+            lcs_to_rcs,
+            rcs_to_lcs,
+        }
+    }
+
+    pub fn build(o: &Point, i: &Vector, j: &Vector, k: &Vector) -> Result<Cs, &'static str> {
+        Cs::check_base(i, j, k)?;
+        Ok(Cs::new(o, i, j, k))
+    }
+
+    pub fn build_from_k(o: &Point, k: &Vector) -> Cs {
+        let cs: Cs;
+        assert!(nearly_equal(k.length(), 1.));
+
+        if k.nearly_equal(&J) {
+            cs = Cs::new(o, &-I, &K, &J);
+        } else if k.nearly_equal(&(-1. * &J)) {
+            cs = Cs::new(o, &-K, &I, &-J);
+        } else {
+            let fact_j = &J - (k.y * k);
+            let j = (1. / fact_j.length()) * fact_j;
+            let i = &j ^ k;
+            cs = Cs::new(o, &i, &j, k);
+        }
+
+        cs
     }
 }
 
@@ -62,7 +113,8 @@ mod tests {
 
     #[test]
     fn check_build_1() {
-        if let Err(e) = Cs::build(CS.o, CS.i, CS.j, CS.k) {
+        let cs = Cs::new(&STD_CS.o, &STD_CS.i, &STD_CS.j, &STD_CS.k);
+        if let Err(e) = Cs::check_base(&cs.i, &cs.j, &cs.k) {
             panic!("{e}");
         }
     }
@@ -70,7 +122,8 @@ mod tests {
     #[test]
     #[should_panic]
     fn check_build_2() {
-        if let Err(e) = Cs::build(CS.o, 2. * CS.i, CS.j, CS.k) {
+        let cs = Cs::new(&STD_CS.o, &(2. * STD_CS.i), &STD_CS.j, &STD_CS.k);
+        if let Err(e) = Cs::check_base(&cs.i, &cs.j, &cs.k) {
             panic!("{e}");
         }
     }
@@ -78,7 +131,8 @@ mod tests {
     #[test]
     #[should_panic]
     fn check_build_3() {
-        if let Err(e) = Cs::build(CS.o, CS.i, 2. * CS.j, CS.k) {
+        let cs = Cs::new(&STD_CS.o, &STD_CS.i, &(2. * STD_CS.j), &STD_CS.k);
+        if let Err(e) = Cs::check_base(&cs.i, &cs.j, &cs.k) {
             panic!("{e}");
         }
     }
@@ -86,7 +140,8 @@ mod tests {
     #[test]
     #[should_panic]
     fn check_build_4() {
-        if let Err(e) = Cs::build(CS.o, CS.i, CS.j, 2. * CS.k) {
+        let cs = Cs::new(&STD_CS.o, &STD_CS.i, &STD_CS.j, &(2. * STD_CS.k));
+        if let Err(e) = Cs::check_base(&cs.i, &cs.j, &cs.k) {
             panic!("{e}");
         }
     }
@@ -94,7 +149,8 @@ mod tests {
     #[test]
     #[should_panic]
     fn check_build_5() {
-        if let Err(e) = Cs::build(CS.o, CS.j, CS.i, CS.k) {
+        let cs = Cs::new(&STD_CS.o, &STD_CS.j, &STD_CS.i, &STD_CS.k);
+        if let Err(e) = Cs::check_base(&cs.i, &cs.j, &cs.k) {
             panic!("{e}");
         }
     }
@@ -102,7 +158,8 @@ mod tests {
     #[test]
     #[should_panic]
     fn check_build_6() {
-        if let Err(e) = Cs::build(CS.o, CS.i, CS.k, CS.j) {
+        let cs = Cs::new(&STD_CS.o, &STD_CS.i, &STD_CS.k, &STD_CS.j);
+        if let Err(e) = Cs::check_base(&cs.i, &cs.j, &cs.k) {
             panic!("{e}");
         }
     }
@@ -110,7 +167,8 @@ mod tests {
     #[test]
     #[should_panic]
     fn check_build_7() {
-        if let Err(e) = Cs::build(CS.o, CS.k, CS.j, CS.i) {
+        let cs = Cs::new(&STD_CS.o, &STD_CS.k, &STD_CS.j, &STD_CS.i);
+        if let Err(e) = Cs::check_base(&cs.i, &cs.j, &cs.k) {
             panic!("{e}");
         }
     }
@@ -123,7 +181,8 @@ mod tests {
         j.normalize();
         let k = &i ^ &j;
 
-        if let Err(e) = Cs::build(p, i, j, k) {
+        let _ = Cs::new(&p, &i, &j, &k);
+        if let Err(e) = Cs::check_base(&STD_CS.i, &STD_CS.j, &STD_CS.k) {
             panic!("{e}");
         }
     }
@@ -136,7 +195,8 @@ mod tests {
         j.normalize();
         let k = &i ^ &j;
 
-        if let Err(e) = Cs::build(p, i, j, k) {
+        let _ = Cs::new(&p, &i, &j, &k);
+        if let Err(e) = Cs::check_base(&STD_CS.i, &STD_CS.j, &STD_CS.k) {
             panic!("{e}");
         }
     }
@@ -149,7 +209,8 @@ mod tests {
         j.normalize();
         let k = &i ^ &j;
 
-        if let Err(e) = Cs::build(p, i, j, k) {
+        let _ = Cs::new(&p, &i, &j, &k);
+        if let Err(e) = Cs::check_base(&STD_CS.i, &STD_CS.j, &STD_CS.k) {
             panic!("{e}");
         }
     }

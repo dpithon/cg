@@ -1,3 +1,3 @@
 mod pinhole;
 
-pub use pinhole::Pinhole;
+pub use pinhole::{Pinhole, Ray};

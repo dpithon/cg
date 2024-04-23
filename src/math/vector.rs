@@ -74,6 +74,10 @@ impl Vector {
         Vector { x, y, z, w: 0. }
     }
 
+    pub fn from(v: &Vector) -> Vector {
+        Vector::new(v.x, v.y, v.z)
+    }
+
     pub fn unit(self) -> Vector {
         let len = self.length();
         Vector::new(self.x / len, self.y / len, self.z / len)

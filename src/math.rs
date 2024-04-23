@@ -6,7 +6,7 @@ mod quad;
 mod sphcoord;
 mod vector;
 
-pub use cs::Cs;
+pub use cs::{Cs, STD_CS};
 pub use matrix::{Matrix, ID_MATRIX};
 pub use nearly::{nearly_equal, nearly_zero};
 pub use point::{Point, O};

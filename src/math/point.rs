@@ -54,6 +54,15 @@ impl Point {
         Point { x, y, z, w: 1.0 }
     }
 
+    pub fn from(p: &Point) -> Point {
+        Point {
+            x: p.x,
+            y: p.y,
+            z: p.z,
+            w: p.w,
+        }
+    }
+
     pub fn get_w(&self) -> f64 {
         self.w
     }
