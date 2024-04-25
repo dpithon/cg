@@ -57,7 +57,11 @@ impl PinholeSettings {
         self.orientation.get_location()
     }
 
-    pub fn get_heading(&self) -> Vector {
-        self.orientation.get_heading()
+    pub fn compute_heading(&self) -> Vector {
+        self.orientation.compute_heading()
+    }
+
+    pub fn get_focale(&self) -> f64 {
+        self.focale.get_focale()
     }
 }

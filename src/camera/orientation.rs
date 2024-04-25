@@ -56,7 +56,7 @@ impl Orientation {
         &self.location
     }
 
-    pub fn get_heading(&self) -> Vector {
+    pub fn compute_heading(&self) -> Vector {
         match &self.heading {
             Heading::Point(p) => (p - &self.location).unit(),
             Heading::Vector(v) => Vector::from(v).unit(),

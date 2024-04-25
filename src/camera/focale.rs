@@ -12,7 +12,7 @@ pub const DEFAULT_ANGLE: f64 = 90.; // angle = 90.
 
 impl Default for Focale {
     fn default() -> Focale {
-        Focale::Focale(DEFAULT_ANGLE)
+        Focale::AngleDeg(DEFAULT_ANGLE)
     }
 }
 
@@ -20,8 +20,8 @@ impl Display for Focale {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Focale::Focale(d) => write!(f, "focale   : {d}"),
-            Focale::AngleDeg(d) => write!(f, "focale   : {:.2}", d),
-            Focale::AngleRad(d) => write!(f, "focale   : {:.2}", rad_to_deg(*d)),
+            Focale::AngleDeg(d) => write!(f, "focale   : {:.2} degrees", d),
+            Focale::AngleRad(d) => write!(f, "focale   : {:.2} degrees", rad_to_deg(*d)),
         }
     }
 }

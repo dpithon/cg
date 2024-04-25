@@ -3,8 +3,8 @@ use std::fmt::Display;
 use crate::math::{Point, Vector};
 
 pub struct Ray {
-    o: Point,
-    v: Vector,
+    pub o: Point,
+    pub v: Vector,
 }
 
 impl Display for Ray {
