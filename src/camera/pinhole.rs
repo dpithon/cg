@@ -3,16 +3,10 @@ use std::fmt::Display;
 use super::{Focale, PinholeSettings, Sampler};
 use crate::{Cs, Point, Vector};
 
+#[derive(Default)]
 pub struct Pinhole {
     settings: PinholeSettings,
     cs: Cs,
-}
-
-impl Default for Pinhole {
-    fn default() -> Self {
-        let settings = PinholeSettings::default();
-        Self::new(settings)
-    }
 }
 
 impl Display for Pinhole {
@@ -23,7 +17,7 @@ impl Display for Pinhole {
 
 impl Pinhole {
     pub fn new(settings: PinholeSettings) -> Pinhole {
-        let cs = Cs::build_from_k(&settings.location, &settings.get_heading());
+        let cs = Cs::build_from_k(&settings.get_location(), &settings.get_heading());
         Pinhole { settings, cs }
     }
 
@@ -32,12 +26,12 @@ impl Pinhole {
         self
     }
 
-    pub fn point_to(&mut self, target: Point) -> &mut Pinhole {
-        self.settings.point_to(target);
+    pub fn look_at(&mut self, target: Point) -> &mut Pinhole {
+        self.settings.look_at(target);
         self
     }
 
-    pub fn set_heading(&mut self, heading: Vector) -> &Pinhole {
+    pub fn set_heading(&mut self, heading: Vector) -> &mut Pinhole {
         self.settings.set_heading(heading);
         self
     }
@@ -53,7 +47,7 @@ impl Pinhole {
     }
 
     pub fn setup(&mut self) {
-        self.cs = Cs::build_from_k(&self.settings.location, &self.settings.get_heading());
+        self.cs = Cs::build_from_k(&self.settings.get_location(), &self.settings.get_heading());
     }
 
     pub fn iter(&self) -> Sampler {
@@ -76,7 +70,7 @@ mod tests {
                 let mut cam = Pinhole::default();
 
                 cam.move_to(Point::new(1., 2., 3.))
-                    .point_to(SphCoord::build(12., theta, phy).into_point())
+                    .look_at(SphCoord::build(12., theta, phy).into_point())
                     .set_focale(Focale::AngleDeg(90.))
                     .set_image_size(640, 480);
 
