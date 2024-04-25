@@ -17,6 +17,27 @@ pub const O: Point = Point {
     w: 1.,
 };
 
+pub const POINT_I: Point = Point {
+    x: 1.,
+    y: 0.,
+    z: 0.,
+    w: 1.,
+};
+
+pub const POINT_J: Point = Point {
+    x: 0.,
+    y: 1.,
+    z: 0.,
+    w: 1.,
+};
+
+pub const POINT_K: Point = Point {
+    x: 0.,
+    y: 0.,
+    z: 1.,
+    w: 1.,
+};
+
 impl fmt::Display for Point {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "({:.2}, {:.2}, {:.2})", self.x, self.y, self.z)

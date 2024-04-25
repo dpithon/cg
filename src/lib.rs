@@ -1,9 +1,12 @@
-mod cameras;
+mod camera;
 mod math;
+mod ray;
 
 pub use math::{
-    nearly_equal, nearly_zero, AsQuad, Cs, Matrix, Point, Quad, SphCoord, Vector, I, ID_MATRIX, J,
-    K, O, STD_CS, VEC_0,
+    deg_to_rad, nearly_equal, nearly_zero, rad_to_deg, AsQuad, Cs, Matrix, Point, Quad, SphCoord,
+    Vector, I, ID_MATRIX, J, K, O, POINT_I, POINT_J, POINT_K, STD_CS, VEC_0,
 };
 
-pub use cameras::{Pinhole, Ray};
+pub use camera::{Focale, Pinhole, PinholeSettings};
+
+pub use ray::Ray;
