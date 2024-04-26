@@ -7,6 +7,6 @@ pub use math::{
     Vector, I, ID_MATRIX, J, K, O, POINT_I, POINT_J, POINT_K, STD_CS, VEC_0,
 };
 
-pub use camera::{Focale, Pinhole, PinholeSettings};
+pub use camera::{Focale, PinholeSettings};
 
 pub use ray::Ray;

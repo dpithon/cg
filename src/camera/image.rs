@@ -1,5 +1,6 @@
 use std::fmt::Display;
 
+#[derive(Clone, Copy)]
 pub struct ImageSize {
     pub width: u32,
     pub height: u32,

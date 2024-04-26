@@ -33,10 +33,6 @@ impl Display for Orientation {
     }
 }
 impl Orientation {
-    pub fn new(location: Point, heading: Heading) -> Orientation {
-        Orientation { location, heading }
-    }
-
     pub fn move_to(&mut self, p: Point) -> &mut Orientation {
         self.location = p;
         self

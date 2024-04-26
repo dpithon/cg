@@ -8,6 +8,6 @@ mod settings;
 pub use focale::Focale;
 pub use image::ImageSize;
 pub use orientation::Orientation;
-pub use pinhole::Pinhole;
+pub use pinhole::PinholeCamera;
 pub use sampler::Sampler;
 pub use settings::PinholeSettings;
