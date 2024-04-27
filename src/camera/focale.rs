@@ -1,5 +1,7 @@
 use std::fmt::Display;
 
+// TODO: check focale value (angle in [0,180])
+
 use crate::{deg_to_rad, rad_to_deg};
 
 pub enum Focale {
@@ -8,11 +10,11 @@ pub enum Focale {
     AngleRad(f64),
 }
 
-pub const DEFAULT_ANGLE: f64 = 90.; // angle = 90.
+pub const DEFAULT_FOCALE: Focale = Focale::AngleDeg(60.);
 
 impl Default for Focale {
     fn default() -> Focale {
-        Focale::AngleDeg(DEFAULT_ANGLE)
+        DEFAULT_FOCALE
     }
 }
 
