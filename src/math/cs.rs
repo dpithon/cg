@@ -93,13 +93,15 @@ impl Cs {
 
         if k.nearly_equal(&J) {
             cs = Cs::new(o, &-I, &K, &J);
+            assert!(Ok(()) == Cs::check_base(&cs.i, &cs.j, &cs.k));
         } else if k.nearly_equal(&(-1. * &J)) {
             cs = Cs::new(o, &-K, &I, &-J);
+            assert!(Ok(()) == Cs::check_base(&cs.i, &cs.j, &cs.k));
         } else {
-            let fact_j = &J - (k.y * k);
-            let j = (1. / fact_j.length()) * fact_j;
+            let j = (&J - (k.y * k)).unit();
             let i = &j ^ k;
             cs = Cs::new(o, &i, &j, k);
+            assert!(Ok(()) == Cs::check_base(&cs.i, &cs.j, &cs.k));
         }
 
         cs
