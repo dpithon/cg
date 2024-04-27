@@ -52,6 +52,7 @@ impl AsQuad for Vector {
         self.w
     }
 }
+
 impl fmt::Display for Vector {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "({:.2}, {:.2}, {:.2})", self.x, self.y, self.z)
@@ -79,6 +80,7 @@ impl Vector {
     }
 
     pub fn unit(self) -> Vector {
+        // TODO: unit OR normalize ??
         let len = self.length();
         Vector::new(self.x / len, self.y / len, self.z / len)
     }
@@ -95,14 +97,12 @@ impl Vector {
         self.square_length().sqrt()
     }
 
-    pub fn normalize(&mut self) -> &mut Vector {
+    pub fn normalize(&mut self) {
         let len = self.length();
 
         self.x /= len;
         self.y /= len;
         self.z /= len;
-
-        self
     }
 
     pub fn nearly_equal(&self, v: &Vector) -> bool {

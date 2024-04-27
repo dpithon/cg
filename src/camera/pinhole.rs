@@ -1,8 +1,8 @@
 use super::{ImageSize, Sampler};
-use crate::{Cs, Ray};
+use crate::{Cs, Matrix, Ray};
 
 pub struct PinholeCamera {
-    cs: Cs,
+    pub cs: Cs,
     focale: f64,
     image_size: ImageSize, // TODO: use Image
 }
@@ -18,6 +18,10 @@ impl PinholeCamera {
 
     pub fn iter(&self) -> Sampler {
         Sampler::new(&self.image_size, self.focale)
+    }
+
+    pub fn get_matrix(&self) -> &Matrix {
+        &self.cs.lcs_to_rcs
     }
 
     pub fn to_world(&self, ray: &Ray) -> Ray {
@@ -62,10 +66,10 @@ mod tests {
         let cam = PinholeSettings::default()
             .move_to(Point::new(1., 12., 3.))
             .look_at(Point::new(-12., 34., -4.3))
-            .set_image_size(30, 20)
+            .set_image_size(1, 1)
             .build_camera();
         for ray in cam.iter() {
-            println!("{}", cam.to_world(&ray));
+            println!("{}", ray);
         }
     }
 }

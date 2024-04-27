@@ -1,3 +1,4 @@
+use auto_ops::impl_op_ex;
 use std::fmt;
 
 pub trait AsQuad {
@@ -54,3 +55,7 @@ impl AsQuad for Quad {
         self.w
     }
 }
+
+impl_op_ex!(*|lhs: &Quad, rhs: &Quad| -> f64 {
+    lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z + lhs.w * rhs.w
+});

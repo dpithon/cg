@@ -87,10 +87,11 @@ mod tests {
             .move_to(Point::new(1., 2., 3.))
             .look_at(Point::new(4., -2., 8.))
             .set_focale(Focale::AngleDeg(45.))
+            .set_image_size(1, 1)
             .build_camera();
 
         for ray in camera.iter() {
-            println!("{}", camera.to_world(&ray));
+            println!("{}", ray);
         }
     }
 }

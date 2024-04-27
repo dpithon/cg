@@ -34,23 +34,27 @@ impl Sampler {
         let x = self.fac_x * (self.x as f64) + 0.5;
         let y = self.fac_y * (self.y as f64) + self.hlf_h;
 
-        Ray::new(Point::new(x, y, 0.), Vector::new(x, y, -self.focale))
+        Ray::new(Point::new(x, y, 0.), Vector::new(x, y, self.focale).unit()) // TODO: document FM
+                                                                              // ray
     }
 }
 
 impl Iterator for Sampler {
-    type Item = Ray;
+    type Item = (u32, u32, Ray);
 
     fn next(&mut self) -> Option<Self::Item> {
+        let ret;
+
         if self.x == self.max_x && self.y == self.max_y {
-            None
+            ret = None;
         } else if self.x == self.max_x {
+            ret = Some((self.x, self.y, self.convert()));
             self.x = 0;
             self.y += 1;
-            Some(self.convert())
         } else {
+            ret = Some((self.x, self.y, self.convert()));
             self.x += 1;
-            Some(self.convert())
         }
+        ret
     }
 }
