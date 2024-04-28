@@ -36,6 +36,8 @@ impl SphCoord {
         SphCoord { rho, theta, phy }
     }
 
+    // FIXME: as / into rust convention ...
+
     pub fn into_point(self) -> Point {
         self.as_point()
     }
@@ -46,19 +48,36 @@ impl SphCoord {
 
     pub fn as_point(&self) -> Point {
         Point::new(
-            self.rho * self.theta.sin() * self.phy.cos(),
             self.rho * self.theta.sin() * self.phy.sin(),
             self.rho * self.theta.cos(),
+            self.rho * self.theta.sin() * self.phy.cos(),
         )
     }
 
     pub fn as_vector(&self) -> Vector {
         Vector::new(
-            self.rho * self.theta.sin() * self.phy.cos(),
             self.rho * self.theta.sin() * self.phy.sin(),
             self.rho * self.theta.cos(),
+            self.rho * self.theta.sin() * self.phy.cos(),
         )
     }
+
+    //  FIXME: Real convention below ...
+    //
+    //  pub fn as_point(&self) -> Point {
+    //      Point::new(
+    //          self.rho * self.theta.sin() * self.phy.cos(),
+    //          self.rho * self.theta.sin() * self.phy.sin(),
+    //          self.rho * self.theta.cos(),
+    //      )
+    //  }
+    //   pub fn as_vector(&self) -> Vector {
+    //       Vector::new(
+    //           self.rho * self.theta.sin() * self.phy.cos(),
+    //           self.rho * self.theta.sin() * self.phy.sin(),
+    //           self.rho * self.theta.cos(),
+    //       )
+    //   }
 }
 
 #[cfg(test)]
