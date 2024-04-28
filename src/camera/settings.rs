@@ -90,7 +90,7 @@ mod tests {
             .set_image_size(1, 1)
             .build_camera();
 
-        for ray in camera.iter() {
+        for (_, _, ray) in camera.iter() {
             println!("{}", ray);
         }
     }

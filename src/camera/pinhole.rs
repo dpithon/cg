@@ -68,7 +68,7 @@ mod tests {
             .look_at(Point::new(-12., 34., -4.3))
             .set_image_size(1, 1)
             .build_camera();
-        for ray in cam.iter() {
+        for (_, _, ray) in cam.iter() {
             println!("{}", ray);
         }
     }

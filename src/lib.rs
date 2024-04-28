@@ -12,4 +12,4 @@ pub use camera::{Focale, PinholeCamera, PinholeSettings};
 
 pub use ray::Ray;
 
-pub use shapes::{Ball, Shapes};
+pub use shapes::{Ball, Cylinder, Shapes};

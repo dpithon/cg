@@ -7,5 +7,7 @@ pub trait Shapes {
 }
 
 mod ball;
+mod cylinder;
 
 pub use ball::Ball;
+pub use cylinder::Cylinder;

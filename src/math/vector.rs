@@ -112,6 +112,10 @@ impl Vector {
             && nearly_equal(self.w, v.w)
     }
 
+    pub fn nearly_zero(&self) -> bool {
+        nearly_zero(self.x) && nearly_zero(self.y) && nearly_zero(self.z)
+    }
+
     pub fn is_normalized(&self) -> bool {
         nearly_equal(self.square_length(), 1.)
     }

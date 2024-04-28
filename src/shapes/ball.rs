@@ -51,12 +51,12 @@ impl Shapes for Ball {
         if delta >= 0. {
             let k = (-b - delta.sqrt()) / 2.;
             if k > 0. {
-                return Some(k);
+                Some(k)
             } else {
-                return None;
+                None
             }
         } else {
-            return None;
+            None
         }
     }
 }
