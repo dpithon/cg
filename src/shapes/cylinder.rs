@@ -1,5 +1,5 @@
 use super::Shapes;
-use crate::{Cs, Matrix, Ray, Vector, ID_MATRIX, J};
+use crate::{Cs, Matrix, Ray, ID_MATRIX, J};
 
 pub struct Cylinder {
     pub cs: Cs,
@@ -24,29 +24,14 @@ impl Cylinder {
 }
 
 impl Shapes for Cylinder {
-    fn set_camera_cs(&mut self, cam_to_rcs: &Matrix) {
-        self.cam_to_lcs = &self.cs.rcs_to_lcs * cam_to_rcs;
+    fn compute_camcs_to_shapecs(&mut self, cam: &crate::PinholeCamera) {
+        self.cam_to_lcs = &self.cs.rcs_to_lcs * cam.get_lcs_to_rcs();
     }
 
-    fn scale(&mut self, f: f64) {
-        self.cs.scale(f);
+    fn set_shape_cs(&mut self, cs: Cs) {
+        self.cs = cs;
     }
 
-    fn translate(&mut self, v: &Vector) {
-        self.cs.translate(v);
-    }
-
-    fn rotate_x(&mut self, deg: f64) {
-        self.cs.rotate_x(deg);
-    }
-
-    fn rotate_y(&mut self, deg: f64) {
-        self.cs.rotate_y(deg);
-    }
-
-    fn rotate_z(&mut self, deg: f64) {
-        self.cs.rotate_z(deg);
-    }
     fn intersect(&self, _ray: &crate::Ray) -> bool {
         false
     }

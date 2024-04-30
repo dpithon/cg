@@ -1,4 +1,4 @@
-use crate::{nearly_equal, Cs, Matrix, Ray, Shapes, Vector, ID_MATRIX};
+use crate::{nearly_equal, Cs, Matrix, Ray, Shapes, ID_MATRIX};
 
 pub struct Ball {
     pub cs: Cs,
@@ -20,28 +20,12 @@ impl Ball {
 }
 
 impl Shapes for Ball {
-    fn set_camera_cs(&mut self, cam_to_rcs: &Matrix) {
-        self.cam_to_lcs = &self.cs.rcs_to_lcs * cam_to_rcs;
+    fn compute_camcs_to_shapecs(&mut self, cam: &crate::PinholeCamera) {
+        self.cam_to_lcs = &self.cs.rcs_to_lcs * cam.get_lcs_to_rcs();
     }
 
-    fn scale(&mut self, f: f64) {
-        self.cs.scale(f);
-    }
-
-    fn translate(&mut self, v: &Vector) {
-        self.cs.translate(v);
-    }
-
-    fn rotate_x(&mut self, deg: f64) {
-        self.cs.rotate_x(deg);
-    }
-
-    fn rotate_y(&mut self, deg: f64) {
-        self.cs.rotate_y(deg);
-    }
-
-    fn rotate_z(&mut self, deg: f64) {
-        self.cs.rotate_z(deg);
+    fn set_shape_cs(&mut self, cs: Cs) {
+        self.cs = cs;
     }
 
     fn intersect(&self, ray: &Ray) -> bool {

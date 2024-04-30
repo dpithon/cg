@@ -20,7 +20,7 @@ impl PinholeCamera {
         Sampler::new(&self.image_size, self.focale)
     }
 
-    pub fn get_matrix(&self) -> &Matrix {
+    pub fn get_lcs_to_rcs(&self) -> &Matrix {
         &self.cs.lcs_to_rcs
     }
 

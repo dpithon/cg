@@ -16,7 +16,8 @@ impl Default for Cs {
 }
 
 impl Cs {
-    pub fn compute_reverse_transformation(&mut self) {
+    fn compute_reverse_base(&mut self) {
+        //! Works only for unit vectors !
         let i = self.get_i();
         let j = self.get_j();
         let k = self.get_k();
@@ -129,6 +130,8 @@ impl Cs {
         vector::check_base(i, j, k)?;
 
         self.lcs_to_rcs = Matrix::from_columns(&i.q, &j.q, &k.q, &o.q);
+        self.compute_reverse_base();
+
         Ok(())
     }
 
@@ -136,14 +139,15 @@ impl Cs {
         assert!(nearly_equal(k.length(), 1.));
 
         if k.nearly_equal(&J) {
-            self.set_lcs(o, &-I, &K, &J).unwrap()
+            self.set_lcs(o, &-I, &K, &J).unwrap();
         } else if k.nearly_equal(&(-1. * &J)) {
-            self.set_lcs(o, &-K, &I, &-J).unwrap()
+            self.set_lcs(o, &-K, &I, &-J).unwrap();
         } else {
             let j = (&J - (k.q.y * k)).unit();
             let i = &j ^ k;
-            self.set_lcs(o, &i, &j, k).unwrap()
+            self.set_lcs(o, &i, &j, k).unwrap();
         }
+        self.compute_reverse_base();
     }
 }
 
