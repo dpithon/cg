@@ -1,5 +1,5 @@
 use super::Shapes;
-use crate::{Cs, Matrix, Ray, I, ID_MATRIX, J, K, O, VEC_0};
+use crate::{Cs, Matrix, Ray, I, ID_MATRIX, J, K, O};
 
 pub struct Cylinder {
     pub cs: Cs,
@@ -26,7 +26,7 @@ impl Shapes for Cylinder {
         self.cam_to_lcs = &self.cs.rcs_to_lcs * cam_to_rcs;
     }
 
-    fn intersect(&self, ray: &crate::Ray) -> bool {
+    fn intersect(&self, _ray: &crate::Ray) -> bool {
         false
     }
 
