@@ -85,28 +85,38 @@ impl Cs {
     }
 
     pub fn scale(&mut self, f: f64) {
-        let mat = Matrix::scaling(f) * &self.lcs_to_rcs;
-        self.lcs_to_rcs = mat;
+        let mat1 = Matrix::scaling(f) * &self.lcs_to_rcs;
+        let mat2 = &self.rcs_to_lcs * Matrix::scaling(1. / f);
+        self.lcs_to_rcs = mat1;
+        self.rcs_to_lcs = mat2;
     }
 
     pub fn translate(&mut self, v: &Vector) {
-        let mat = Matrix::translation(v) * &self.lcs_to_rcs;
-        self.lcs_to_rcs = mat;
+        let mat1 = Matrix::translation(v) * &self.lcs_to_rcs;
+        let mat2 = &self.rcs_to_lcs * Matrix::translation(&(-v));
+        self.lcs_to_rcs = mat1;
+        self.rcs_to_lcs = mat2;
     }
 
     pub fn rotate_x(&mut self, deg: f64) {
-        let mat = Matrix::rotation_x(deg) * &self.lcs_to_rcs;
-        self.lcs_to_rcs = mat;
+        let mat1 = Matrix::rotation_x(deg) * &self.lcs_to_rcs;
+        let mat2 = &self.rcs_to_lcs * Matrix::rotation_x(-deg);
+        self.lcs_to_rcs = mat1;
+        self.rcs_to_lcs = mat2;
     }
 
     pub fn rotate_y(&mut self, deg: f64) {
-        let mat = Matrix::rotation_y(deg) * &self.lcs_to_rcs;
-        self.lcs_to_rcs = mat;
+        let mat1 = Matrix::rotation_y(deg) * &self.lcs_to_rcs;
+        let mat2 = &self.rcs_to_lcs * Matrix::rotation_y(-deg);
+        self.lcs_to_rcs = mat1;
+        self.rcs_to_lcs = mat2;
     }
 
     pub fn rotate_z(&mut self, deg: f64) {
-        let mat = Matrix::rotation_z(deg) * &self.lcs_to_rcs;
-        self.lcs_to_rcs = mat;
+        let mat1 = Matrix::rotation_z(deg) * &self.lcs_to_rcs;
+        let mat2 = &self.rcs_to_lcs * Matrix::rotation_z(-deg);
+        self.lcs_to_rcs = mat1;
+        self.rcs_to_lcs = mat2;
     }
 
     pub fn set_lcs(
