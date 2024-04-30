@@ -36,7 +36,7 @@ impl SphCoord {
         SphCoord { rho, theta, phy }
     }
 
-    // FIXME: as / into rust convention ...
+    // FIXME: as/into rust convention ...
 
     pub fn into_point(self) -> Point {
         self.as_point()
@@ -116,16 +116,16 @@ mod test {
         let s = SphCoord::build(1., 0., 0.);
         let p = s.into_point();
         assert!(p.x == 0.);
-        assert!(p.y == 0.);
-        assert!(p.z == 1.);
+        assert!(p.y == 1.);
+        assert!(p.z == 0.);
     }
 
     #[test]
     fn into_point_2() {
         let s = SphCoord::build(1., PI / 4., PI / 4.);
         let p = s.into_point();
-        assert!((p.z - f64::sqrt(2.0) / 2.).abs() < 0.0001);
+        assert!((p.y - f64::sqrt(2.0) / 2.).abs() < 0.0001);
         assert!((p.x - 0.5).abs() < 0.0001);
-        assert!((p.y - 0.5).abs() < 0.0001);
+        assert!((p.z - 0.5).abs() < 0.0001);
     }
 }
