@@ -29,9 +29,9 @@ impl Shapes for Ball {
             o: &self.cam_to_lcs * &ray.o,
         };
 
-        let b = 2. * (ray.v.x * ray.o.x + ray.v.y * ray.o.y + ray.v.z * ray.o.z);
-        let c =
-            ray.o.x * ray.o.x + ray.o.y * ray.o.y + ray.o.z * ray.o.z - self.radius * self.radius;
+        let b = 2. * (ray.v.q.x * ray.o.q.x + ray.v.q.y * ray.o.q.y + ray.v.q.z * ray.o.q.z);
+        let c = ray.o.q.x * ray.o.q.x + ray.o.q.y * ray.o.q.y + ray.o.q.z * ray.o.q.z
+            - self.radius * self.radius;
         let delta = b * b - 4. * c;
 
         delta >= 0.
@@ -43,9 +43,9 @@ impl Shapes for Ball {
         };
         assert!(nearly_equal(ray.v.length(), 1.));
 
-        let b = 2. * (ray.v.x * ray.o.x + ray.v.y * ray.o.y + ray.v.z * ray.o.z);
-        let c =
-            ray.o.x * ray.o.x + ray.o.y * ray.o.y + ray.o.z * ray.o.z - self.radius * self.radius;
+        let b = 2. * (ray.v.q.x * ray.o.q.x + ray.v.q.y * ray.o.q.y + ray.v.q.z * ray.o.q.z);
+        let c = ray.o.q.x * ray.o.q.x + ray.o.q.y * ray.o.q.y + ray.o.q.z * ray.o.q.z
+            - self.radius * self.radius;
         let delta = b * b - 4. * c;
 
         if delta >= 0. {

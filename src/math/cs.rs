@@ -1,6 +1,6 @@
 use std::fmt;
 
-use crate::{nearly_equal, Matrix, Point, Quad, Vector, I, ID_MATRIX, J, K, O};
+use crate::{nearly_equal, Matrix, Point, Quad, Vector, I, J, K, STD_CS};
 
 pub struct Cs {
     pub o: Point,
@@ -10,15 +10,6 @@ pub struct Cs {
     pub lcs_to_rcs: Matrix, // local cs to reference cs
     pub rcs_to_lcs: Matrix, // reference cs to local cs
 }
-
-pub const STD_CS: Cs = Cs {
-    o: O,
-    i: I,
-    j: J,
-    k: K,
-    lcs_to_rcs: ID_MATRIX,
-    rcs_to_lcs: ID_MATRIX,
-};
 
 impl fmt::Display for Cs {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -35,11 +26,26 @@ impl Default for Cs {
 impl Cs {
     pub fn compute_matrices(o: &Point, i: &Vector, j: &Vector, k: &Vector) -> (Matrix, Matrix) {
         (
-            Matrix::from_columns(i, j, k, o),
+            Matrix::from_columns(&i.q, &j.q, &k.q, &o.q),
             Matrix::from_lines(
-                &Quad::new(i.x, i.y, i.z, -i.x * o.x - i.y * o.y - i.z * o.z),
-                &Quad::new(j.x, j.y, j.z, -j.x * o.x - j.y * o.y - j.z * o.z),
-                &Quad::new(k.x, k.y, k.z, -k.x * o.x - k.y * o.y - k.z * o.z),
+                &Quad::new(
+                    i.q.x,
+                    i.q.y,
+                    i.q.z,
+                    -i.q.x * o.q.x - i.q.y * o.q.y - i.q.z * o.q.z,
+                ),
+                &Quad::new(
+                    j.q.x,
+                    j.q.y,
+                    j.q.z,
+                    -j.q.x * o.q.x - j.q.y * o.q.y - j.q.z * o.q.z,
+                ),
+                &Quad::new(
+                    k.q.x,
+                    k.q.y,
+                    k.q.z,
+                    -k.q.x * o.q.x - k.q.y * o.q.y - k.q.z * o.q.z,
+                ),
                 &Quad::new(0., 0., 0., 1.),
             ),
         )
@@ -73,10 +79,10 @@ impl Cs {
         let (lcs_to_rcs, rcs_to_lcs) = Cs::compute_matrices(o, i, j, k);
 
         Cs {
-            o: Point::from(o),
-            i: Vector::from(i),
-            j: Vector::from(j),
-            k: Vector::from(k),
+            o: o.clone(),
+            i: i.clone(),
+            j: j.clone(),
+            k: k.clone(),
             lcs_to_rcs,
             rcs_to_lcs,
         }
@@ -98,7 +104,7 @@ impl Cs {
             cs = Cs::new(o, &-K, &I, &-J);
             assert!(Ok(()) == Cs::check_base(&cs.i, &cs.j, &cs.k));
         } else {
-            let j = (&J - (k.y * k)).unit();
+            let j = (&J - (k.q.y * k)).unit();
             let i = &j ^ k;
             cs = Cs::new(o, &i, &j, k);
             assert!(Ok(()) == Cs::check_base(&cs.i, &cs.j, &cs.k));
@@ -111,7 +117,7 @@ impl Cs {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{Point, Vector};
+    use crate::{Point, Vector, O};
 
     #[test]
     fn check_build_1() {
@@ -179,7 +185,7 @@ mod tests {
     fn check_build_8() {
         let p = Point::new(1., 2., 3.);
         let i = Vector::new(36.2067, 67.43, -15.011).unit();
-        let mut j = &J - i.y * &i;
+        let mut j = &J - i.q.y * &i;
         j.normalize();
         let k = &i ^ &j;
 
@@ -193,7 +199,7 @@ mod tests {
     fn check_build_9() {
         let p = Point::new(1., 2., 3.);
         let i = Vector::new(5.34, -15.13, 73.22).unit();
-        let mut j = &J - i.y * &i;
+        let mut j = &J - i.q.y * &i;
         j.normalize();
         let k = &i ^ &j;
 
@@ -207,7 +213,7 @@ mod tests {
     fn check_build_10() {
         let p = Point::new(1., 2., 3.);
         let i = Vector::new(-75.34, -1.3, 2.73).unit();
-        let mut j = &J - i.y * &i;
+        let mut j = &J - i.q.y * &i;
         j.normalize();
         let k = &i ^ &j;
 

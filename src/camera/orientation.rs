@@ -55,7 +55,7 @@ impl Orientation {
     pub fn compute_heading(&self) -> Vector {
         match &self.heading {
             Heading::Point(p) => (p - &self.location).unit(),
-            Heading::Vector(v) => Vector::from(v).unit(),
+            Heading::Vector(v) => v.clone().unit(),
         }
     }
 }

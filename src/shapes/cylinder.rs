@@ -36,12 +36,12 @@ impl Shapes for Cylinder {
             o: &self.cam_to_lcs * &ray.o,
         };
 
-        let val = ray.o.x * ray.o.x + ray.o.z * ray.o.z;
+        let val = ray.o.q.x * ray.o.q.x + ray.o.q.z * ray.o.q.z;
         if (&ray.v ^ &J).nearly_zero() && val <= self.radius2 {
             Some(std::f64::MIN_POSITIVE)
         } else {
-            let a = ray.v.x * ray.v.x + ray.v.z * ray.v.z;
-            let b = 2. * (ray.v.x * ray.o.x + ray.v.z * ray.o.z);
+            let a = ray.v.q.x * ray.v.q.x + ray.v.q.z * ray.v.q.z;
+            let b = 2. * (ray.v.q.x * ray.o.q.x + ray.v.q.z * ray.o.q.z);
             let c = val - self.radius2;
 
             let delta = b * b - 4. * a * c;

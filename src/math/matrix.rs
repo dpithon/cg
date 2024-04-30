@@ -1,50 +1,31 @@
 use auto_ops::impl_op_ex;
 use std::fmt;
 
-use crate::{AsQuad, Point, Vector};
+use crate::{Point, Quad, Vector};
 
 pub struct Matrix {
-    m: [[f64; 4]; 4],
+    pub m: [[f64; 4]; 4],
 }
 
-pub const ID_MATRIX: Matrix = Matrix {
-    m: [
-        [1., 0., 0., 0.],
-        [0., 1., 0., 0.],
-        [0., 0., 1., 0.],
-        [0., 0., 0., 1.],
-    ],
-};
-
 impl Matrix {
-    pub fn from_lines(
-        q1: &dyn AsQuad,
-        q2: &dyn AsQuad,
-        q3: &dyn AsQuad,
-        q4: &dyn AsQuad,
-    ) -> Matrix {
+    pub fn from_lines(q1: &Quad, q2: &Quad, q3: &Quad, q4: &Quad) -> Matrix {
         Matrix {
             m: [
-                [q1.get_x(), q1.get_y(), q1.get_z(), q1.get_w()],
-                [q2.get_x(), q2.get_y(), q2.get_z(), q2.get_w()],
-                [q3.get_x(), q3.get_y(), q3.get_z(), q3.get_w()],
-                [q4.get_x(), q4.get_y(), q4.get_z(), q4.get_w()],
+                [q1.x, q1.y, q1.z, q1.w],
+                [q2.x, q2.y, q2.z, q2.w],
+                [q3.x, q3.y, q3.z, q3.w],
+                [q4.x, q4.y, q4.z, q4.w],
             ],
         }
     }
 
-    pub fn from_columns(
-        q1: &dyn AsQuad,
-        q2: &dyn AsQuad,
-        q3: &dyn AsQuad,
-        q4: &dyn AsQuad,
-    ) -> Matrix {
+    pub fn from_columns(q1: &Quad, q2: &Quad, q3: &Quad, q4: &Quad) -> Matrix {
         Matrix {
             m: [
-                [q1.get_x(), q2.get_x(), q3.get_x(), q4.get_x()],
-                [q1.get_y(), q2.get_y(), q3.get_y(), q4.get_y()],
-                [q1.get_z(), q2.get_z(), q3.get_z(), q4.get_z()],
-                [q1.get_w(), q2.get_w(), q3.get_w(), q4.get_w()],
+                [q1.x, q2.x, q3.x, q4.x],
+                [q1.y, q2.y, q3.y, q4.y],
+                [q1.z, q2.z, q3.z, q4.z],
+                [q1.w, q2.w, q3.w, q4.w],
             ],
         }
     }
@@ -63,17 +44,26 @@ impl Matrix {
 
 impl_op_ex!(*|lhs: &Matrix, rhs: &Vector| -> Vector {
     Vector::new(
-        lhs.m[0][0] * rhs.x + lhs.m[0][1] * rhs.y + lhs.m[0][2] * rhs.z,
-        lhs.m[1][0] * rhs.x + lhs.m[1][1] * rhs.y + lhs.m[1][2] * rhs.z,
-        lhs.m[2][0] * rhs.x + lhs.m[2][1] * rhs.y + lhs.m[2][2] * rhs.z,
+        lhs.m[0][0] * rhs.q.x + lhs.m[0][1] * rhs.q.y + lhs.m[0][2] * rhs.q.z,
+        lhs.m[1][0] * rhs.q.x + lhs.m[1][1] * rhs.q.y + lhs.m[1][2] * rhs.q.z,
+        lhs.m[2][0] * rhs.q.x + lhs.m[2][1] * rhs.q.y + lhs.m[2][2] * rhs.q.z,
     )
 });
 
 impl_op_ex!(*|lhs: &Matrix, rhs: &Point| -> Point {
     Point::new(
-        lhs.m[0][0] * rhs.x + lhs.m[0][1] * rhs.y + lhs.m[0][2] * rhs.z + lhs.m[0][3] * rhs.get_w(),
-        lhs.m[1][0] * rhs.x + lhs.m[1][1] * rhs.y + lhs.m[1][2] * rhs.z + lhs.m[1][3] * rhs.get_w(),
-        lhs.m[2][0] * rhs.x + lhs.m[2][1] * rhs.y + lhs.m[2][2] * rhs.z + lhs.m[2][3] * rhs.get_w(),
+        lhs.m[0][0] * rhs.q.x
+            + lhs.m[0][1] * rhs.q.y
+            + lhs.m[0][2] * rhs.q.z
+            + lhs.m[0][3] * rhs.q.w,
+        lhs.m[1][0] * rhs.q.x
+            + lhs.m[1][1] * rhs.q.y
+            + lhs.m[1][2] * rhs.q.z
+            + lhs.m[1][3] * rhs.q.w,
+        lhs.m[2][0] * rhs.q.x
+            + lhs.m[2][1] * rhs.q.y
+            + lhs.m[2][2] * rhs.q.z
+            + lhs.m[2][3] * rhs.q.w,
     )
 });
 
