@@ -1,4 +1,4 @@
-use super::{Cs, Matrix, Point, Vector};
+use super::{Matrix, Point, Vector};
 
 pub const POINT_I: Point = Point::new(1., 0., 0.);
 pub const POINT_J: Point = Point::new(0., 1., 0.);
@@ -15,12 +15,4 @@ pub const ID_MATRIX: Matrix = Matrix {
         [0., 0., 1., 0.],
         [0., 0., 0., 1.],
     ],
-};
-pub const STD_CS: Cs = Cs {
-    o: O,
-    i: I,
-    j: J,
-    k: K,
-    lcs_to_rcs: ID_MATRIX,
-    rcs_to_lcs: ID_MATRIX,
 };

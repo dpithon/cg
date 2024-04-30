@@ -16,4 +16,4 @@ pub use nearly::{nearly_equal, nearly_zero};
 pub use point::Point;
 pub use quad::Quad;
 pub use sphcoord::SphCoord;
-pub use vector::Vector;
+pub use vector::{check_base, Vector};

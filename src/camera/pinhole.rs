@@ -34,8 +34,7 @@ impl PinholeCamera {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::{Focale, PinholeSettings, Point, SphCoord};
+    use crate::{check_base, Focale, PinholeSettings, Point, SphCoord};
 
     #[test]
     fn cam_4() {
@@ -51,8 +50,7 @@ mod tests {
                     .set_focale(Focale::AngleDeg(90.))
                     .set_image_size(640, 480)
                     .build_camera();
-
-                if let Err(e) = Cs::check_base(&cam.cs.i, &cam.cs.j, &cam.cs.k) {
+                if let Err(e) = check_base(&cam.cs.get_i(), &cam.cs.get_j(), &cam.cs.get_k()) {
                     panic!("{e}");
                 }
                 phy += step;

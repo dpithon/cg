@@ -20,6 +20,30 @@ impl fmt::Debug for Vector {
     }
 }
 
+pub fn check_base(i: &Vector, j: &Vector, k: &Vector) -> Result<(), &'static str> {
+    if !i.is_normalized() {
+        Err("i is not unit vector")
+    } else if !j.is_normalized() {
+        Err("j is not unit vector")
+    } else if !k.is_normalized() {
+        Err("k is not unit vector")
+    } else if !i.is_normal_to(j) {
+        Err("i is not normal to j")
+    } else if !j.is_normal_to(k) {
+        Err("j is not normal to k")
+    } else if !k.is_normal_to(i) {
+        Err("k is not normal to i")
+    } else if !i.nearly_equal(&(j ^ k)) {
+        Err("i != j ^ k")
+    } else if !j.nearly_equal(&(k ^ i)) {
+        Err("j != k ^ i")
+    } else if !k.nearly_equal(&(i ^ j)) {
+        Err("k != i ^ j")
+    } else {
+        Ok(())
+    }
+}
+
 impl Vector {
     pub const fn new(x: f64, y: f64, z: f64) -> Vector {
         Vector {

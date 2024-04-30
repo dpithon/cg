@@ -1,7 +1,7 @@
 use auto_ops::impl_op_ex;
 use std::fmt;
 
-use crate::{Point, Quad, Vector};
+use crate::{deg_to_rad, Point, Quad, Vector};
 
 pub struct Matrix {
     pub m: [[f64; 4]; 4],
@@ -37,6 +37,67 @@ impl Matrix {
                 [self.m[0][1], self.m[1][1], self.m[2][1], self.m[3][1]],
                 [self.m[0][2], self.m[1][2], self.m[2][2], self.m[3][2]],
                 [self.m[0][3], self.m[1][3], self.m[2][3], self.m[3][3]],
+            ],
+        }
+    }
+
+    pub fn translation(v: &Vector) -> Matrix {
+        Matrix {
+            m: [
+                [1., 0., 0., v.q.x],
+                [0., 1., 0., v.q.y],
+                [0., 0., 1., v.q.z],
+                [0., 0., 0., 1.],
+            ],
+        }
+    }
+
+    pub fn scaling(f: f64) -> Matrix {
+        Matrix {
+            m: [
+                [f, 0., 0., 0.],
+                [0., f, 0., 0.],
+                [0., 0., f, 0.],
+                [0., 0., 0., 1.],
+            ],
+        }
+    }
+
+    pub fn rotation_x(deg: f64) -> Matrix {
+        let rad = deg_to_rad(deg);
+
+        Matrix {
+            m: [
+                [1., 0., 0., 0.],
+                [0., rad.cos(), -rad.sin(), 0.],
+                [0., rad.sin(), rad.cos(), 0.],
+                [0., 0., 0., 1.],
+            ],
+        }
+    }
+
+    pub fn rotation_y(deg: f64) -> Matrix {
+        let rad = deg_to_rad(deg);
+
+        Matrix {
+            m: [
+                [rad.cos(), 0., rad.sin(), 0.],
+                [0., 1., 0., 0.],
+                [-rad.sin(), 0., rad.cos(), 0.],
+                [0., 0., 0., 1.],
+            ],
+        }
+    }
+
+    pub fn rotation_z(deg: f64) -> Matrix {
+        let rad = deg_to_rad(deg);
+
+        Matrix {
+            m: [
+                [rad.cos(), -rad.sin(), 0., 0.],
+                [rad.sin(), rad.cos(), 0., 0.],
+                [0., 0., 1., 0.],
+                [0., 0., 0., 1.],
             ],
         }
     }

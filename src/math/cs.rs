@@ -1,185 +1,146 @@
-use std::fmt;
-
-use crate::{nearly_equal, Matrix, Point, Quad, Vector, I, J, K, STD_CS};
+use crate::math::vector;
+use crate::{nearly_equal, Matrix, Point, Quad, Vector, I, ID_MATRIX, J, K};
 
 pub struct Cs {
-    pub o: Point,
-    pub i: Vector,
-    pub j: Vector,
-    pub k: Vector,
     pub lcs_to_rcs: Matrix, // local cs to reference cs
     pub rcs_to_lcs: Matrix, // reference cs to local cs
 }
 
-impl fmt::Display for Cs {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "O:{}\nI:{}\nJ:{}\nK:{}", self.o, self.i, self.j, self.k)
-    }
-}
-
 impl Default for Cs {
-    fn default() -> Self {
-        STD_CS
+    fn default() -> Cs {
+        Cs {
+            lcs_to_rcs: ID_MATRIX,
+            rcs_to_lcs: ID_MATRIX,
+        }
     }
 }
 
 impl Cs {
-    pub fn compute_matrices(o: &Point, i: &Vector, j: &Vector, k: &Vector) -> (Matrix, Matrix) {
-        (
-            Matrix::from_columns(&i.q, &j.q, &k.q, &o.q),
-            Matrix::from_lines(
-                &Quad::new(
-                    i.q.x,
-                    i.q.y,
-                    i.q.z,
-                    -i.q.x * o.q.x - i.q.y * o.q.y - i.q.z * o.q.z,
-                ),
-                &Quad::new(
-                    j.q.x,
-                    j.q.y,
-                    j.q.z,
-                    -j.q.x * o.q.x - j.q.y * o.q.y - j.q.z * o.q.z,
-                ),
-                &Quad::new(
-                    k.q.x,
-                    k.q.y,
-                    k.q.z,
-                    -k.q.x * o.q.x - k.q.y * o.q.y - k.q.z * o.q.z,
-                ),
-                &Quad::new(0., 0., 0., 1.),
+    pub fn compute_reverse_transformation(&mut self) {
+        let i = self.get_i();
+        let j = self.get_j();
+        let k = self.get_k();
+        let o = self.get_o();
+
+        self.rcs_to_lcs = Matrix::from_lines(
+            &Quad::new(
+                i.q.x,
+                i.q.y,
+                i.q.z,
+                -i.q.x * o.q.x - i.q.y * o.q.y - i.q.z * o.q.z,
             ),
+            &Quad::new(
+                j.q.x,
+                j.q.y,
+                j.q.z,
+                -j.q.x * o.q.x - j.q.y * o.q.y - j.q.z * o.q.z,
+            ),
+            &Quad::new(
+                k.q.x,
+                k.q.y,
+                k.q.z,
+                -k.q.x * o.q.x - k.q.y * o.q.y - k.q.z * o.q.z,
+            ),
+            &Quad::new(0., 0., 0., 1.),
+        );
+    }
+
+    pub fn get_o(&self) -> Point {
+        Point::new(
+            self.lcs_to_rcs.m[0][3],
+            self.lcs_to_rcs.m[1][3],
+            self.lcs_to_rcs.m[2][3],
         )
     }
 
-    pub fn check_base(i: &Vector, j: &Vector, k: &Vector) -> Result<(), &'static str> {
-        if !i.is_normalized() {
-            Err("i is not unit vector")
-        } else if !j.is_normalized() {
-            Err("j is not unit vector")
-        } else if !k.is_normalized() {
-            Err("k is not unit vector")
-        } else if !i.is_normal_to(j) {
-            Err("i is not normal to j")
-        } else if !j.is_normal_to(k) {
-            Err("j is not normal to k")
-        } else if !k.is_normal_to(i) {
-            Err("k is not normal to i")
-        } else if !i.nearly_equal(&(j ^ k)) {
-            Err("i != j ^ k")
-        } else if !j.nearly_equal(&(k ^ i)) {
-            Err("j != k ^ i")
-        } else if !k.nearly_equal(&(i ^ j)) {
-            Err("k != i ^ j")
-        } else {
-            Ok(())
-        }
+    pub fn get_i(&self) -> Vector {
+        Vector::new(
+            self.lcs_to_rcs.m[0][0],
+            self.lcs_to_rcs.m[1][0],
+            self.lcs_to_rcs.m[2][0],
+        )
     }
 
-    pub fn new(o: &Point, i: &Vector, j: &Vector, k: &Vector) -> Cs {
-        let (lcs_to_rcs, rcs_to_lcs) = Cs::compute_matrices(o, i, j, k);
+    pub fn get_j(&self) -> Vector {
+        Vector::new(
+            self.lcs_to_rcs.m[0][1],
+            self.lcs_to_rcs.m[1][1],
+            self.lcs_to_rcs.m[2][1],
+        )
+    }
 
+    pub fn get_k(&self) -> Vector {
+        Vector::new(
+            self.lcs_to_rcs.m[0][2],
+            self.lcs_to_rcs.m[1][2],
+            self.lcs_to_rcs.m[2][2],
+        )
+    }
+
+    pub fn new() -> Cs {
         Cs {
-            o: o.clone(),
-            i: i.clone(),
-            j: j.clone(),
-            k: k.clone(),
-            lcs_to_rcs,
-            rcs_to_lcs,
+            lcs_to_rcs: ID_MATRIX,
+            rcs_to_lcs: ID_MATRIX,
         }
     }
 
-    pub fn build(o: &Point, i: &Vector, j: &Vector, k: &Vector) -> Result<Cs, &'static str> {
-        Cs::check_base(i, j, k)?;
-        Ok(Cs::new(o, i, j, k))
+    pub fn scale(&mut self, f: f64) {
+        let mat = Matrix::scaling(f) * &self.lcs_to_rcs;
+        self.lcs_to_rcs = mat;
     }
 
-    pub fn build_from_k(o: &Point, k: &Vector) -> Cs {
-        let cs: Cs;
+    pub fn translate(&mut self, v: &Vector) {
+        let mat = Matrix::translation(v) * &self.lcs_to_rcs;
+        self.lcs_to_rcs = mat;
+    }
+
+    pub fn rotate_x(&mut self, deg: f64) {
+        let mat = Matrix::rotation_x(deg) * &self.lcs_to_rcs;
+        self.lcs_to_rcs = mat;
+    }
+
+    pub fn rotate_y(&mut self, deg: f64) {
+        let mat = Matrix::rotation_y(deg) * &self.lcs_to_rcs;
+        self.lcs_to_rcs = mat;
+    }
+
+    pub fn rotate_z(&mut self, deg: f64) {
+        let mat = Matrix::rotation_z(deg) * &self.lcs_to_rcs;
+        self.lcs_to_rcs = mat;
+    }
+
+    pub fn set_lcs(
+        &mut self,
+        o: &Point,
+        i: &Vector,
+        j: &Vector,
+        k: &Vector,
+    ) -> Result<(), &'static str> {
+        vector::check_base(i, j, k)?;
+
+        self.lcs_to_rcs = Matrix::from_columns(&i.q, &j.q, &k.q, &o.q);
+        Ok(())
+    }
+
+    pub fn compute_lcs_with(&mut self, o: &Point, k: &Vector) {
         assert!(nearly_equal(k.length(), 1.));
 
         if k.nearly_equal(&J) {
-            cs = Cs::new(o, &-I, &K, &J);
-            assert!(Ok(()) == Cs::check_base(&cs.i, &cs.j, &cs.k));
+            self.set_lcs(o, &-I, &K, &J).unwrap()
         } else if k.nearly_equal(&(-1. * &J)) {
-            cs = Cs::new(o, &-K, &I, &-J);
-            assert!(Ok(()) == Cs::check_base(&cs.i, &cs.j, &cs.k));
+            self.set_lcs(o, &-K, &I, &-J).unwrap()
         } else {
             let j = (&J - (k.q.y * k)).unit();
             let i = &j ^ k;
-            cs = Cs::new(o, &i, &j, k);
-            assert!(Ok(()) == Cs::check_base(&cs.i, &cs.j, &cs.k));
+            self.set_lcs(o, &i, &j, k).unwrap()
         }
-
-        cs
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{Point, Vector, O};
-
-    #[test]
-    fn check_build_1() {
-        let cs = Cs::new(&STD_CS.o, &STD_CS.i, &STD_CS.j, &STD_CS.k);
-        if let Err(e) = Cs::check_base(&cs.i, &cs.j, &cs.k) {
-            panic!("{e}");
-        }
-    }
-
-    #[test]
-    #[should_panic]
-    fn check_build_2() {
-        let cs = Cs::new(&STD_CS.o, &(2. * STD_CS.i), &STD_CS.j, &STD_CS.k);
-        if let Err(e) = Cs::check_base(&cs.i, &cs.j, &cs.k) {
-            panic!("{e}");
-        }
-    }
-
-    #[test]
-    #[should_panic]
-    fn check_build_3() {
-        let cs = Cs::new(&STD_CS.o, &STD_CS.i, &(2. * STD_CS.j), &STD_CS.k);
-        if let Err(e) = Cs::check_base(&cs.i, &cs.j, &cs.k) {
-            panic!("{e}");
-        }
-    }
-
-    #[test]
-    #[should_panic]
-    fn check_build_4() {
-        let cs = Cs::new(&STD_CS.o, &STD_CS.i, &STD_CS.j, &(2. * STD_CS.k));
-        if let Err(e) = Cs::check_base(&cs.i, &cs.j, &cs.k) {
-            panic!("{e}");
-        }
-    }
-
-    #[test]
-    #[should_panic]
-    fn check_build_5() {
-        let cs = Cs::new(&STD_CS.o, &STD_CS.j, &STD_CS.i, &STD_CS.k);
-        if let Err(e) = Cs::check_base(&cs.i, &cs.j, &cs.k) {
-            panic!("{e}");
-        }
-    }
-
-    #[test]
-    #[should_panic]
-    fn check_build_6() {
-        let cs = Cs::new(&STD_CS.o, &STD_CS.i, &STD_CS.k, &STD_CS.j);
-        if let Err(e) = Cs::check_base(&cs.i, &cs.j, &cs.k) {
-            panic!("{e}");
-        }
-    }
-
-    #[test]
-    #[should_panic]
-    fn check_build_7() {
-        let cs = Cs::new(&STD_CS.o, &STD_CS.k, &STD_CS.j, &STD_CS.i);
-        if let Err(e) = Cs::check_base(&cs.i, &cs.j, &cs.k) {
-            panic!("{e}");
-        }
-    }
+    use crate::{Point, Vector};
 
     #[test]
     fn check_build_8() {
@@ -189,8 +150,8 @@ mod tests {
         j.normalize();
         let k = &i ^ &j;
 
-        let _ = Cs::new(&p, &i, &j, &k);
-        if let Err(e) = Cs::check_base(&STD_CS.i, &STD_CS.j, &STD_CS.k) {
+        let mut cs = Cs::new();
+        if let Err(e) = cs.set_lcs(&p, &i, &j, &k) {
             panic!("{e}");
         }
     }
@@ -203,8 +164,8 @@ mod tests {
         j.normalize();
         let k = &i ^ &j;
 
-        let _ = Cs::new(&p, &i, &j, &k);
-        if let Err(e) = Cs::check_base(&STD_CS.i, &STD_CS.j, &STD_CS.k) {
+        let mut cs = Cs::new();
+        if let Err(e) = cs.set_lcs(&p, &i, &j, &k) {
             panic!("{e}");
         }
     }
@@ -217,16 +178,9 @@ mod tests {
         j.normalize();
         let k = &i ^ &j;
 
-        let _ = Cs::new(&p, &i, &j, &k);
-        if let Err(e) = Cs::check_base(&STD_CS.i, &STD_CS.j, &STD_CS.k) {
+        let mut cs = Cs::new();
+        if let Err(e) = cs.set_lcs(&p, &i, &j, &k) {
             panic!("{e}");
         }
-    }
-    #[test]
-    fn check_default_cs() {
-        let cs = Cs::default();
-        assert!(cs.o.nearly_equal(&O));
-        assert!(cs.i.nearly_equal(&I));
-        assert!(cs.j.nearly_equal(&J));
     }
 }

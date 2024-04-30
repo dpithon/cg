@@ -1,5 +1,5 @@
 use super::Shapes;
-use crate::{Cs, Matrix, Ray, I, ID_MATRIX, J, K, O};
+use crate::{Cs, Matrix, Ray, Vector, ID_MATRIX, J};
 
 pub struct Cylinder {
     pub cs: Cs,
@@ -12,11 +12,13 @@ impl Cylinder {
     pub fn build(radius: f64) -> Cylinder {
         assert!(radius > 0.);
 
+        let cs = Cs::new();
+
         Cylinder {
-            cs: Cs::new(&O, &I, &J, &K),
-            cam_to_lcs: ID_MATRIX,
+            cs,
             radius,
             radius2: radius * radius,
+            cam_to_lcs: ID_MATRIX,
         }
     }
 }
@@ -26,6 +28,25 @@ impl Shapes for Cylinder {
         self.cam_to_lcs = &self.cs.rcs_to_lcs * cam_to_rcs;
     }
 
+    fn scale(&mut self, f: f64) {
+        self.cs.scale(f);
+    }
+
+    fn translate(&mut self, v: &Vector) {
+        self.cs.translate(v);
+    }
+
+    fn rotate_x(&mut self, deg: f64) {
+        self.cs.rotate_x(deg);
+    }
+
+    fn rotate_y(&mut self, deg: f64) {
+        self.cs.rotate_y(deg);
+    }
+
+    fn rotate_z(&mut self, deg: f64) {
+        self.cs.rotate_z(deg);
+    }
     fn intersect(&self, _ray: &crate::Ray) -> bool {
         false
     }
@@ -38,6 +59,7 @@ impl Shapes for Cylinder {
 
         let val = ray.o.q.x * ray.o.q.x + ray.o.q.z * ray.o.q.z;
         if (&ray.v ^ &J).nearly_zero() && val <= self.radius2 {
+            // FIXME: ray.v ^ J => ray.v.y ~ 0
             Some(std::f64::MIN_POSITIVE)
         } else {
             let a = ray.v.q.x * ray.v.q.x + ray.v.q.z * ray.v.q.z;

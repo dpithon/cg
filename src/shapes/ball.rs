@@ -1,4 +1,4 @@
-use crate::{nearly_equal, Cs, Matrix, Point, Ray, Shapes, I, ID_MATRIX, J, K};
+use crate::{nearly_equal, Cs, Matrix, Ray, Shapes, Vector, ID_MATRIX};
 
 pub struct Ball {
     pub cs: Cs,
@@ -7,13 +7,14 @@ pub struct Ball {
 }
 
 impl Ball {
-    pub fn build(center: &Point, radius: f64) -> Ball {
+    pub fn build(radius: f64) -> Ball {
         assert!(radius > 0.);
+        let cs = Cs::new();
 
         Ball {
-            cs: Cs::new(center, &I, &J, &K),
-            cam_to_lcs: ID_MATRIX,
+            cs,
             radius,
+            cam_to_lcs: ID_MATRIX,
         }
     }
 }
@@ -21,6 +22,26 @@ impl Ball {
 impl Shapes for Ball {
     fn set_camera_cs(&mut self, cam_to_rcs: &Matrix) {
         self.cam_to_lcs = &self.cs.rcs_to_lcs * cam_to_rcs;
+    }
+
+    fn scale(&mut self, f: f64) {
+        self.cs.scale(f);
+    }
+
+    fn translate(&mut self, v: &Vector) {
+        self.cs.translate(v);
+    }
+
+    fn rotate_x(&mut self, deg: f64) {
+        self.cs.rotate_x(deg);
+    }
+
+    fn rotate_y(&mut self, deg: f64) {
+        self.cs.rotate_y(deg);
+    }
+
+    fn rotate_z(&mut self, deg: f64) {
+        self.cs.rotate_z(deg);
     }
 
     fn intersect(&self, ray: &Ray) -> bool {

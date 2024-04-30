@@ -63,11 +63,9 @@ impl PinholeSettings {
     }
 
     pub fn build_camera(&self) -> PinholeCamera {
-        PinholeCamera::new(
-            Cs::build_from_k(self.get_location(), &self.compute_heading()),
-            self.image_size,
-            self.get_focale(),
-        )
+        let mut cs = Cs::new();
+        cs.compute_lcs_with(self.get_location(), &self.compute_heading());
+        PinholeCamera::new(cs, self.image_size, self.get_focale())
     }
 }
 
