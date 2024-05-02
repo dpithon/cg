@@ -1,22 +1,18 @@
 use std::fmt::Display;
 
-use super::{Focale, ImageSize, Orientation, PinholeCamera};
+use super::{Focale, ImageSize, PinholeCamera};
 use crate::{Cs, Point, Vector};
 
 #[derive(Default)]
 pub struct PinholeSettings {
-    orientation: Orientation,
+    cs: Cs,
     image_size: ImageSize,
     focale: Focale,
 }
 
 impl Display for PinholeSettings {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{}\n{}\n{}",
-            self.orientation, self.focale, self.image_size
-        )
+        write!(f, "{}\n{}", self.focale, self.image_size)
     }
 }
 
@@ -25,18 +21,8 @@ impl PinholeSettings {
         PinholeSettings::default()
     }
 
-    pub fn move_to(&mut self, location: Point) -> &mut PinholeSettings {
-        self.orientation.move_to(location);
-        self
-    }
-
-    pub fn look_at(&mut self, target: Point) -> &mut PinholeSettings {
-        self.orientation.look_at(target);
-        self
-    }
-
-    pub fn set_heading(&mut self, heading: Vector) -> &mut PinholeSettings {
-        self.orientation.set_heading(heading);
+    pub fn set_lcs(&mut self, cs: Cs) -> &mut PinholeSettings {
+        self.cs = cs;
         self
     }
 
@@ -54,42 +40,7 @@ impl PinholeSettings {
         self
     }
 
-    pub fn get_location(&self) -> &Point {
-        self.orientation.get_location()
-    }
-
-    pub fn compute_heading(&self) -> Vector {
-        self.orientation.compute_heading()
-    }
-
     pub fn build_camera(&self) -> PinholeCamera {
-        let mut cs = Cs::new();
-        cs.compute_lcs_with(self.get_location(), &self.compute_heading());
-        PinholeCamera::new(cs, self.image_size, self.get_focale())
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::{Focale, PinholeSettings, Point};
-
-    #[test]
-    fn settings_1() {
-        let settings = PinholeSettings::default();
-        let _ = settings.build_camera();
-    }
-
-    #[test]
-    fn cam_5() {
-        let camera = PinholeSettings::default()
-            .move_to(Point::new(1., 2., 3.))
-            .look_at(Point::new(4., -2., 8.))
-            .set_focale(Focale::AngleDeg(45.))
-            .set_image_size(1, 1)
-            .build_camera();
-
-        for (_, _, ray) in camera.iter() {
-            println!("{}", ray);
-        }
+        PinholeCamera::new(self.cs, self.image_size, self.get_focale())
     }
 }

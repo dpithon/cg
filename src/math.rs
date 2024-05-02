@@ -10,7 +10,7 @@ mod vector;
 
 pub use angle::{deg_to_rad, rad_to_deg};
 pub use consts::*;
-pub use cs::Cs;
+pub use cs::{BindToCs, Cs};
 pub use matrix::Matrix;
 pub use nearly::{nearly_equal, nearly_zero};
 pub use point::Point;

@@ -5,21 +5,34 @@ use crate::{nearly_equal, nearly_zero, Quad};
 
 #[derive(Clone)]
 pub struct Vector {
-    pub q: Quad,
+    pub x: f64,
+    pub y: f64,
+    pub z: f64,
+    w: f64,
 }
 
 impl fmt::Display for Vector {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.q.fmt(f)
+        write!(f, "({:.2}, {:.2}, {:.2})", self.x, self.y, self.z)
     }
 }
 
 impl fmt::Debug for Vector {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.q.fmt(f)
+        f.debug_tuple("")
+            .field(&self.x)
+            .field(&self.y)
+            .field(&self.z)
+            .field(&self.w)
+            .finish()
     }
 }
 
+impl Quad for Vector {
+    fn get_quad(&self) -> [f64; 4] {
+        [self.x, self.y, self.z, self.w]
+    }
+}
 pub fn check_base(i: &Vector, j: &Vector, k: &Vector) -> Result<(), &'static str> {
     if !i.is_normalized() {
         Err("i is not unit vector")
@@ -46,19 +59,17 @@ pub fn check_base(i: &Vector, j: &Vector, k: &Vector) -> Result<(), &'static str
 
 impl Vector {
     pub const fn new(x: f64, y: f64, z: f64) -> Vector {
-        Vector {
-            q: Quad { x, y, z, w: 0. },
-        }
+        Vector { x, y, z, w: 0. }
     }
 
     pub fn unit(self) -> Vector {
         // TODO: unit OR normalize ??
         let len = self.length();
-        Vector::new(self.q.x / len, self.q.y / len, self.q.z / len)
+        Vector::new(self.x / len, self.y / len, self.z / len)
     }
 
     pub fn square_length(&self) -> f64 {
-        self.q.x * self.q.x + self.q.y * self.q.y + self.q.z * self.q.z
+        self.x * self.x + self.y * self.y + self.z * self.z
     }
 
     pub fn length(&self) -> f64 {
@@ -67,18 +78,21 @@ impl Vector {
 
     pub fn normalize(&mut self) {
         let len = self.length();
+        if nearly_zero(len) {
+            panic!("zero vector!")
+        }
 
-        self.q.x /= len;
-        self.q.y /= len;
-        self.q.z /= len;
+        self.x /= len;
+        self.y /= len;
+        self.z /= len;
     }
 
     pub fn nearly_equal(&self, v: &Vector) -> bool {
-        self.q.nearly_equal(&v.q)
+        self.nearly_equal(&v)
     }
 
     pub fn nearly_zero(&self) -> bool {
-        self.q.nearly_zero()
+        self.nearly_zero()
     }
 
     pub fn is_normalized(&self) -> bool {
@@ -92,49 +106,47 @@ impl Vector {
 
 impl_op_ex!(+|lhs: &Vector, rhs: &Vector| -> Vector {
     Vector::new(
-        lhs.q.x + rhs.q.x,
-        lhs.q.y + rhs.q.y,
-        lhs.q.z + rhs.q.z,
+        lhs.x + rhs.x,
+        lhs.y + rhs.y,
+        lhs.z + rhs.z,
     )
 });
 
 impl_op_ex!(+= |lhs: &mut Vector, rhs: &Vector| {
-    lhs.q.x += rhs.q.x;
-    lhs.q.y += rhs.q.y;
-    lhs.q.z += rhs.q.z;
+    lhs.x += rhs.x;
+    lhs.y += rhs.y;
+    lhs.z += rhs.z;
 });
 
 impl_op_ex!(-|lhs: &Vector, rhs: &Vector| -> Vector {
-    Vector::new(lhs.q.x - rhs.q.x, lhs.q.y - rhs.q.y, lhs.q.z - rhs.q.z)
+    Vector::new(lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z)
 });
 
 impl_op_ex!(-= |lhs: &mut Vector, rhs: &Vector| {
-    lhs.q.x -= rhs.q.x;
-    lhs.q.y -= rhs.q.y;
-    lhs.q.z -= rhs.q.z;
+    lhs.x -= rhs.x;
+    lhs.y -= rhs.y;
+    lhs.z -= rhs.z;
 });
 
-impl_op_ex!(-|v: &Vector| -> Vector { Vector::new(-v.q.x, -v.q.y, -v.q.z) });
+impl_op_ex!(-|v: &Vector| -> Vector { Vector::new(-v.x, -v.y, -v.z) });
 
-impl_op_ex!(*|lhs: &Vector, rhs: &Vector| -> f64 {
-    lhs.q.x * rhs.q.x + lhs.q.y * rhs.q.y + lhs.q.z * rhs.q.z
-});
+impl_op_ex!(*|lhs: &Vector, rhs: &Vector| -> f64 { lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z });
 
 impl_op_ex!(*|lhs: f64, rhs: &Vector| -> Vector {
-    Vector::new(lhs * rhs.q.x, lhs * rhs.q.y, lhs * rhs.q.z)
+    Vector::new(lhs * rhs.x, lhs * rhs.y, lhs * rhs.z)
 });
 
 impl_op_ex!(*= |lhs: &mut Vector, rhs: f64| {
-    lhs.q.x *= rhs;
-    lhs.q.y *= rhs;
-    lhs.q.z *= rhs;
+    lhs.x *= rhs;
+    lhs.y *= rhs;
+    lhs.z *= rhs;
 });
 
 impl_op_ex!(^ |lhs: &Vector, rhs: &Vector| -> Vector {
     Vector::new(
-        lhs.q.y * rhs.q.z - lhs.q.z * rhs.q.y,
-        lhs.q.z * rhs.q.x - lhs.q.x * rhs.q.z,
-        lhs.q.x * rhs.q.y - lhs.q.y * rhs.q.x,
+        lhs.y * rhs.z - lhs.z * rhs.y,
+        lhs.z * rhs.x - lhs.x * rhs.z,
+        lhs.x * rhs.y - lhs.y * rhs.x,
     )
 });
 
@@ -147,7 +159,7 @@ mod tests {
     #[test]
     fn vector_1() {
         let p = Vector::new(1., 2., 3.);
-        assert!(p.q.x == 1. && p.q.y == 2. && p.q.z == 3. && p.q.w == 0.);
+        assert!(p.x == 1. && p.y == 2. && p.z == 3. && p.w == 0.);
     }
 
     #[test]
@@ -155,7 +167,7 @@ mod tests {
         let a = Point::new(1., 2., 3.);
         let b = Point::new(3., 2., 4.);
         let p = &b - &a;
-        assert!(p.q.x == 2. && p.q.y == 0. && p.q.z == 1. && p.q.w == 0.);
+        assert!(p.x == 2. && p.y == 0. && p.z == 1. && p.w == 0.);
     }
 
     #[test]
@@ -164,16 +176,11 @@ mod tests {
         let a_again = Point::new(1., 2., 3.);
         let b = Point::new(3., 2., 4.);
         let p = &b - &a;
-        assert!(p.q.x == 2. && p.q.y == 0. && p.q.z == 1. && p.q.w == 0.);
+        assert!(p.x == 2. && p.y == 0. && p.z == 1. && p.w == 0.);
 
         let a_t = &a + &p;
-        assert!(a_t.q.x == b.q.x && a_t.q.y == b.q.y && a_t.q.z == b.q.z && a_t.q.w == 1.);
-        assert!(
-            a_again.q.x == a.q.x
-                && a_again.q.y == a.q.y
-                && a_again.q.z == a.q.z
-                && a_again.q.w == 1.
-        );
+        assert!(a_t.x == b.x && a_t.y == b.y && a_t.z == b.z);
+        assert!(a_again.x == a.x && a_again.y == a.y && a_again.z == a.z);
     }
 
     #[test]
@@ -181,10 +188,10 @@ mod tests {
         let mut a = Point::new(1., 2., 3.);
         let b = Point::new(3., 2., 4.);
         let p = &b - &a;
-        assert!(p.q.x == 2. && p.q.y == 0. && p.q.z == 1. && p.q.w == 0.);
+        assert!(p.x == 2. && p.y == 0. && p.z == 1. && p.w == 0.);
 
         a += &p;
-        assert!(a.q.x == b.q.x && a.q.y == b.q.y && a.q.z == b.q.z && a.q.w == 1.);
+        assert!(a.x == b.x && a.y == b.y && a.z == b.z);
     }
 
     #[test]
@@ -193,8 +200,8 @@ mod tests {
         let v = Vector::new(3., 2., 4.);
         let b = &a + &v;
 
-        assert!(b.q.x == 4. && b.q.y == 4. && b.q.z == 7. && b.q.w == 1.);
-        assert!(v.q.x == 3.);
+        assert!(b.x == 4. && b.y == 4. && b.z == 7.);
+        assert!(v.x == 3.);
     }
 
     #[test]
@@ -203,8 +210,8 @@ mod tests {
         let v = Vector::new(3., 2., 4.);
         a += &v;
 
-        assert!(a.q.x == 4. && a.q.y == 4. && a.q.z == 7. && a.q.w == 1.);
-        assert!(v.q.x == 3.);
+        assert!(a.x == 4. && a.y == 4. && a.z == 7.);
+        assert!(v.x == 3.);
     }
 
     #[test]
@@ -230,9 +237,9 @@ mod tests {
         let j = K ^ I;
         let k = I ^ J;
 
-        assert!(i.q.x == 1. && i.q.y == 0. && i.q.z == 0. && i.q.w == 0.);
-        assert!(j.q.x == 0. && j.q.y == 1. && j.q.z == 0. && j.q.w == 0.);
-        assert!(k.q.x == 0. && k.q.y == 0. && k.q.z == 1. && k.q.w == 0.);
+        assert!(i.x == 1. && i.y == 0. && i.z == 0. && i.w == 0.);
+        assert!(j.x == 0. && j.y == 1. && j.z == 0. && j.w == 0.);
+        assert!(k.x == 0. && k.y == 0. && k.z == 1. && k.w == 0.);
     }
 
     #[test]

@@ -1,5 +1,5 @@
 use super::Shapes;
-use crate::{Cs, Matrix, Ray, ID_MATRIX, J};
+use crate::{BindToCs, Cs, Matrix, Ray, ID_MATRIX, J};
 
 pub struct Cylinder {
     pub cs: Cs,
@@ -23,6 +23,12 @@ impl Cylinder {
     }
 }
 
+impl BindToCs for Cylinder {
+    fn get_cs(&self) -> &mut Cs {
+        &mut self.cs
+    }
+}
+
 impl Shapes for Cylinder {
     fn compute_camcs_to_shapecs(&mut self, cam: &crate::PinholeCamera) {
         self.cam_to_lcs = &self.cs.rcs_to_lcs * cam.get_lcs_to_rcs();
@@ -42,13 +48,13 @@ impl Shapes for Cylinder {
             o: &self.cam_to_lcs * &ray.o,
         };
 
-        let val = ray.o.q.x * ray.o.q.x + ray.o.q.z * ray.o.q.z;
+        let val = ray.o.x * ray.o.x + ray.o.z * ray.o.z;
         if (&ray.v ^ &J).nearly_zero() && val <= self.radius2 {
             // FIXME: ray.v ^ J => ray.v.y ~ 0
             Some(std::f64::MIN_POSITIVE)
         } else {
-            let a = ray.v.q.x * ray.v.q.x + ray.v.q.z * ray.v.q.z;
-            let b = 2. * (ray.v.q.x * ray.o.q.x + ray.v.q.z * ray.o.q.z);
+            let a = ray.v.x * ray.v.x + ray.v.z * ray.v.z;
+            let b = 2. * (ray.v.x * ray.o.x + ray.v.z * ray.o.z);
             let c = val - self.radius2;
 
             let delta = b * b - 4. * a * c;

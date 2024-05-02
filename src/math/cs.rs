@@ -1,6 +1,40 @@
 use crate::math::vector;
 use crate::{nearly_equal, Matrix, Point, Quad, Vector, I, ID_MATRIX, J, K};
 
+pub trait BindToCs {
+    fn get_cs(&self) -> &mut Cs;
+
+    fn scale(&mut self, f: f64) -> &mut Self {
+        self.get_cs().scale(f);
+        self
+    }
+
+    fn translate(&mut self, v: &Vector) -> &mut Self {
+        self.get_cs().translate(v);
+        self
+    }
+
+    fn rotate_x(&mut self, deg: f64) -> &mut Self {
+        self.get_cs().rotate_x(deg);
+        self
+    }
+
+    fn rotate_y(&mut self, deg: f64) -> &mut Self {
+        self.get_cs().rotate_y(deg);
+        self
+    }
+
+    fn rotate_z(&mut self, deg: f64) -> &mut Self {
+        self.get_cs().rotate_z(deg);
+        self
+    }
+
+    fn complete_lcs(&mut self, o: &Point, k: &Vector) -> &mut Self {
+        self.get_cs().complete_lcs(o, k);
+        self
+    }
+}
+
 pub struct Cs {
     pub lcs_to_rcs: Matrix, // local cs to reference cs
     pub rcs_to_lcs: Matrix, // reference cs to local cs
@@ -24,58 +58,27 @@ impl Cs {
         let o = self.get_o();
 
         self.rcs_to_lcs = Matrix::from_lines(
-            &Quad::new(
-                i.q.x,
-                i.q.y,
-                i.q.z,
-                -i.q.x * o.q.x - i.q.y * o.q.y - i.q.z * o.q.z,
-            ),
-            &Quad::new(
-                j.q.x,
-                j.q.y,
-                j.q.z,
-                -j.q.x * o.q.x - j.q.y * o.q.y - j.q.z * o.q.z,
-            ),
-            &Quad::new(
-                k.q.x,
-                k.q.y,
-                k.q.z,
-                -k.q.x * o.q.x - k.q.y * o.q.y - k.q.z * o.q.z,
-            ),
-            &Quad::new(0., 0., 0., 1.),
+            [i.x, i.y, i.z, -i.x * o.x - i.y * o.y - i.z * o.z],
+            [j.x, j.y, j.z, -j.x * o.x - j.y * o.y - j.z * o.z],
+            [k.x, k.y, k.z, -k.x * o.x - k.y * o.y - k.z * o.z],
+            [0., 0., 0., 1.],
         );
     }
 
     pub fn get_o(&self) -> Point {
-        Point::new(
-            self.lcs_to_rcs.m[0][3],
-            self.lcs_to_rcs.m[1][3],
-            self.lcs_to_rcs.m[2][3],
-        )
+        self.lcs_to_rcs.get_o()
     }
 
     pub fn get_i(&self) -> Vector {
-        Vector::new(
-            self.lcs_to_rcs.m[0][0],
-            self.lcs_to_rcs.m[1][0],
-            self.lcs_to_rcs.m[2][0],
-        )
+        self.lcs_to_rcs.get_i()
     }
 
     pub fn get_j(&self) -> Vector {
-        Vector::new(
-            self.lcs_to_rcs.m[0][1],
-            self.lcs_to_rcs.m[1][1],
-            self.lcs_to_rcs.m[2][1],
-        )
+        self.lcs_to_rcs.get_j()
     }
 
     pub fn get_k(&self) -> Vector {
-        Vector::new(
-            self.lcs_to_rcs.m[0][2],
-            self.lcs_to_rcs.m[1][2],
-            self.lcs_to_rcs.m[2][2],
-        )
+        self.lcs_to_rcs.get_k()
     }
 
     pub fn new() -> Cs {
@@ -129,13 +132,14 @@ impl Cs {
     ) -> Result<(), &'static str> {
         vector::check_base(i, j, k)?;
 
-        self.lcs_to_rcs = Matrix::from_columns(&i.q, &j.q, &k.q, &o.q);
+        self.lcs_to_rcs =
+            Matrix::from_columns(i.get_quad(), j.get_quad(), k.get_quad(), o.get_quad());
         self.compute_reverse_base();
 
         Ok(())
     }
 
-    pub fn compute_lcs_with(&mut self, o: &Point, k: &Vector) {
+    pub fn complete_lcs(&mut self, o: &Point, k: &Vector) {
         assert!(nearly_equal(k.length(), 1.));
 
         if k.nearly_equal(&J) {
@@ -143,7 +147,7 @@ impl Cs {
         } else if k.nearly_equal(&(-1. * &J)) {
             self.set_lcs(o, &-K, &I, &-J).unwrap();
         } else {
-            let j = (&J - (k.q.y * k)).unit();
+            let j = (&J - (k.y * k)).unit();
             let i = &j ^ k;
             self.set_lcs(o, &i, &j, k).unwrap();
         }
@@ -160,7 +164,7 @@ mod tests {
     fn check_build_8() {
         let p = Point::new(1., 2., 3.);
         let i = Vector::new(36.2067, 67.43, -15.011).unit();
-        let mut j = &J - i.q.y * &i;
+        let mut j = &J - i.y * &i;
         j.normalize();
         let k = &i ^ &j;
 
@@ -174,7 +178,7 @@ mod tests {
     fn check_build_9() {
         let p = Point::new(1., 2., 3.);
         let i = Vector::new(5.34, -15.13, 73.22).unit();
-        let mut j = &J - i.q.y * &i;
+        let mut j = &J - i.y * &i;
         j.normalize();
         let k = &i ^ &j;
 
@@ -188,7 +192,7 @@ mod tests {
     fn check_build_10() {
         let p = Point::new(1., 2., 3.);
         let i = Vector::new(-75.34, -1.3, 2.73).unit();
-        let mut j = &J - i.q.y * &i;
+        let mut j = &J - i.y * &i;
         j.normalize();
         let k = &i ^ &j;
 

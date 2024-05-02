@@ -1,5 +1,5 @@
-use super::{ImageSize, Sampler};
-use crate::{Cs, Matrix, Ray};
+use super::{focale::DEFAULT_FOCALE, ImageSize, Sampler};
+use crate::{BindToCs, Cs, Matrix, Ray, ID_MATRIX};
 
 pub struct PinholeCamera {
     pub cs: Cs,
@@ -7,13 +7,25 @@ pub struct PinholeCamera {
     image_size: ImageSize, // TODO: use Image
 }
 
-impl PinholeCamera {
-    pub fn new(cs: Cs, image_size: ImageSize, focale: f64) -> PinholeCamera {
+impl Default for PinholeCamera {
+    fn default() -> Self {
         PinholeCamera {
-            cs,
-            image_size,
-            focale,
+            cs: Cs::default(),
+            focale: DEFAULT_FOCALE,
+            image_size: ImageSize::default(),
         }
+    }
+}
+
+impl BindToCs for PinholeCamera {
+    fn get_cs(&self) -> &mut Cs {
+        &mut self.cs
+    }
+}
+
+impl PinholeCamera {
+    pub fn new() -> PinholeCamera {
+        PinholeCamera::default()
     }
 
     pub fn iter(&self) -> Sampler {
@@ -34,7 +46,7 @@ impl PinholeCamera {
 
 #[cfg(test)]
 mod tests {
-    use crate::{check_base, Focale, PinholeSettings, Point, SphCoord};
+    use crate::{check_base, Cs, Focale, PinholeSettings, Point, SphCoord, Vector};
 
     #[test]
     fn cam_4() {
@@ -44,9 +56,14 @@ mod tests {
         while theta < std::f64::consts::PI {
             let mut phy: f64 = 0.;
             while phy < 2. * std::f64::consts::PI {
+                let mut cs = Cs::new();
+                cs.compute_lcs_with(
+                    &Point::new(1., 2., 3.),
+                    &SphCoord::build(12., theta, phy).into_vector().unit(),
+                );
+
                 let cam = PinholeSettings::default()
-                    .move_to(Point::new(1., 2., 3.))
-                    .look_at(SphCoord::build(12., theta, phy).into_point())
+                    .set_cam_cs(cs)
                     .set_focale(Focale::AngleDeg(90.))
                     .set_image_size(640, 480)
                     .build_camera();

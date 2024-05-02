@@ -115,17 +115,17 @@ mod test {
     fn into_point_1() {
         let s = SphCoord::build(1., 0., 0.);
         let p = s.into_point();
-        assert!(p.q.x == 0.);
-        assert!(p.q.y == 1.);
-        assert!(p.q.z == 0.);
+        assert!(p.x == 0.);
+        assert!(p.y == 1.);
+        assert!(p.z == 0.);
     }
 
     #[test]
     fn into_point_2() {
         let s = SphCoord::build(1., PI / 4., PI / 4.);
         let p = s.into_point();
-        assert!((p.q.y - f64::sqrt(2.0) / 2.).abs() < 0.0001);
-        assert!((p.q.x - 0.5).abs() < 0.0001);
-        assert!((p.q.z - 0.5).abs() < 0.0001);
+        assert!((p.y - f64::sqrt(2.0) / 2.).abs() < 0.0001);
+        assert!((p.x - 0.5).abs() < 0.0001);
+        assert!((p.z - 0.5).abs() < 0.0001);
     }
 }
