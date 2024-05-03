@@ -1,5 +1,5 @@
 use super::Shapes;
-use crate::{BindToCs, Cs, Matrix, Ray, ID_MATRIX, J};
+use crate::{Cs, Matrix, Ray, ID_MATRIX, J};
 
 pub struct Cylinder {
     pub cs: Cs,
@@ -23,15 +23,17 @@ impl Cylinder {
     }
 }
 
-impl BindToCs for Cylinder {
-    fn get_cs(&self) -> &mut Cs {
-        &mut self.cs
-    }
-}
-
 impl Shapes for Cylinder {
-    fn compute_camcs_to_shapecs(&mut self, cam: &crate::PinholeCamera) {
-        self.cam_to_lcs = &self.cs.rcs_to_lcs * cam.get_lcs_to_rcs();
+    fn set_transform(&mut self, m: Matrix) {
+        self.cam_to_lcs = m;
+    }
+
+    fn get_matrix_to_lcs(&self) -> &Matrix {
+        self.cs.get_matrix_to_lcs()
+    }
+
+    fn get_matrix_to_rcs(&self) -> &Matrix {
+        self.cs.get_matrix_to_rcs()
     }
 
     fn set_shape_cs(&mut self, cs: Cs) {

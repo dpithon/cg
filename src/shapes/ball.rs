@@ -1,4 +1,4 @@
-use crate::{nearly_equal, BindToCs, Cs, Matrix, Ray, Shapes, ID_MATRIX};
+use crate::{nearly_equal, Cs, Matrix, Ray, Shapes, ID_MATRIX};
 
 pub struct Ball {
     pub cs: Cs,
@@ -19,15 +19,17 @@ impl Ball {
     }
 }
 
-impl BindToCs for Ball {
-    fn get_cs(&self) -> &mut Cs {
-        &mut self.cs
-    }
-}
-
 impl Shapes for Ball {
-    fn compute_camcs_to_shapecs(&mut self, cam: &crate::PinholeCamera) {
-        self.cam_to_lcs = &self.cs.rcs_to_lcs * cam.get_lcs_to_rcs();
+    fn set_transform(&mut self, m: Matrix) {
+        self.cam_to_lcs = m;
+    }
+
+    fn get_matrix_to_lcs(&self) -> &Matrix {
+        self.cs.get_matrix_to_lcs()
+    }
+
+    fn get_matrix_to_rcs(&self) -> &Matrix {
+        self.cs.get_matrix_to_rcs()
     }
 
     fn set_shape_cs(&mut self, cs: Cs) {

@@ -4,7 +4,7 @@ use std::fmt;
 use crate::{deg_to_rad, Point, Vector};
 
 pub struct Matrix {
-    m: [[f64; 4]; 4],
+    pub m: [[f64; 4]; 4],
 }
 
 impl Matrix {

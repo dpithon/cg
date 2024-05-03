@@ -10,12 +10,9 @@ pub enum Focale {
     AngleRad(f64),
 }
 
-pub const DEFAULT: Focale = Focale::AngleDeg(60.);
-pub const DEFAULT_FOCALE: f64 = DEFAULT.get_focale();
-
 impl Default for Focale {
     fn default() -> Focale {
-        DEFAULT
+        Focale::AngleDeg(40.)
     }
 }
 
@@ -30,7 +27,7 @@ impl Display for Focale {
 }
 
 impl Focale {
-    pub const fn get_focale(&self) -> f64 {
+    pub fn get_focale(&self) -> f64 {
         match self {
             Focale::AngleDeg(deg) => {
                 let rad = deg_to_rad(*deg);

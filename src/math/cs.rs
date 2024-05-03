@@ -1,43 +1,9 @@
 use crate::math::vector;
 use crate::{nearly_equal, Matrix, Point, Quad, Vector, I, ID_MATRIX, J, K};
 
-pub trait BindToCs {
-    fn get_cs(&self) -> &mut Cs;
-
-    fn scale(&mut self, f: f64) -> &mut Self {
-        self.get_cs().scale(f);
-        self
-    }
-
-    fn translate(&mut self, v: &Vector) -> &mut Self {
-        self.get_cs().translate(v);
-        self
-    }
-
-    fn rotate_x(&mut self, deg: f64) -> &mut Self {
-        self.get_cs().rotate_x(deg);
-        self
-    }
-
-    fn rotate_y(&mut self, deg: f64) -> &mut Self {
-        self.get_cs().rotate_y(deg);
-        self
-    }
-
-    fn rotate_z(&mut self, deg: f64) -> &mut Self {
-        self.get_cs().rotate_z(deg);
-        self
-    }
-
-    fn complete_lcs(&mut self, o: &Point, k: &Vector) -> &mut Self {
-        self.get_cs().complete_lcs(o, k);
-        self
-    }
-}
-
 pub struct Cs {
-    pub lcs_to_rcs: Matrix, // local cs to reference cs
-    pub rcs_to_lcs: Matrix, // reference cs to local cs
+    lcs_to_rcs: Matrix, // local cs to reference cs
+    rcs_to_lcs: Matrix, // reference cs to local cs
 }
 
 impl Default for Cs {
@@ -86,6 +52,14 @@ impl Cs {
             lcs_to_rcs: ID_MATRIX,
             rcs_to_lcs: ID_MATRIX,
         }
+    }
+
+    pub fn get_matrix_to_lcs(&self) -> &Matrix {
+        &self.rcs_to_lcs
+    }
+
+    pub fn get_matrix_to_rcs(&self) -> &Matrix {
+        &self.rcs_to_lcs
     }
 
     pub fn scale(&mut self, f: f64) {

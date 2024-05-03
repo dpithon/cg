@@ -88,11 +88,11 @@ impl Vector {
     }
 
     pub fn nearly_equal(&self, v: &Vector) -> bool {
-        self.nearly_equal(&v)
+        nearly_equal(self.x, v.x) && nearly_equal(self.y, v.y) && nearly_equal(self.z, v.z)
     }
 
     pub fn nearly_zero(&self) -> bool {
-        self.nearly_zero()
+        nearly_zero(self.x) && nearly_zero(self.y) && nearly_zero(self.z)
     }
 
     pub fn is_normalized(&self) -> bool {
