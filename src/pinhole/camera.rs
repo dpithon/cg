@@ -85,7 +85,8 @@ impl Camera {
 
 #[cfg(test)]
 mod tests {
-    use crate::{check_base, Camera, Focale, Point, SphCoord};
+    use crate::Vector;
+    use crate::{Camera, Focale, Point, SphCoord};
 
     #[test]
     fn cam_4() {
@@ -103,7 +104,7 @@ mod tests {
                 .set_focale(Focale::AngleDeg(90.))
                 .set_image_size(640, 480);
                 let lcs = cam.cs.get_matrix_to_lcs();
-                if let Err(e) = check_base(&lcs.get_i(), &lcs.get_j(), &lcs.get_k()) {
+                if let Err(e) = Vector::check_base(&lcs.get_i(), &lcs.get_j(), &lcs.get_k()) {
                     panic!("{e}");
                 }
                 phy += step;

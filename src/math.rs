@@ -14,6 +14,5 @@ pub use cs::Cs;
 pub use matrix::Matrix;
 pub use nearly::{nearly_equal, nearly_zero};
 pub use point::Point;
-pub use quad::Quad;
 pub use sphcoord::SphCoord;
-pub use vector::{check_base, Vector};
+pub use vector::Vector;

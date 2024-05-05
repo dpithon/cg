@@ -1,7 +1,8 @@
 use auto_ops::impl_op_ex;
 use std::fmt;
 
-use crate::{nearly_equal, nearly_zero, Quad, Vector};
+use super::quad::Quad;
+use super::{nearly_equal, nearly_zero, Vector};
 
 #[derive(Clone)]
 pub struct Point {

@@ -1,5 +1,5 @@
 use super::Shapes;
-use crate::{Cs, Matrix, Ray, ID_MATRIX, J};
+use crate::{Cs, Matrix, Ray, J};
 
 pub struct Cylinder {
     pub cs: Cs,
@@ -18,7 +18,7 @@ impl Cylinder {
             cs,
             radius,
             radius2: radius * radius,
-            cam_to_lcs: ID_MATRIX,
+            cam_to_lcs: Matrix::default(),
         }
     }
 }

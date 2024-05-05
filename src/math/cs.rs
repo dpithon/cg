@@ -1,5 +1,6 @@
-use crate::math::vector;
-use crate::{nearly_equal, Matrix, Point, Quad, Vector, I, ID_MATRIX, J, K};
+use super::quad::Quad;
+use super::{nearly_equal, Matrix, Point, Vector};
+use super::{I, ID_MATRIX, J, K};
 
 pub struct Cs {
     lcs_to_rcs: Matrix, // local cs to reference cs
@@ -88,7 +89,7 @@ impl Cs {
         j: &Vector,
         k: &Vector,
     ) -> Result<(), &'static str> {
-        vector::check_base(i, j, k)?;
+        Vector::check_base(i, j, k)?;
 
         self.lcs_to_rcs =
             Matrix::from_columns(i.get_quad(), j.get_quad(), k.get_quad(), o.get_quad());

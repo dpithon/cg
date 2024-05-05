@@ -1,4 +1,4 @@
-use crate::{nearly_equal, Cs, Matrix, Ray, Shapes, ID_MATRIX};
+use crate::{nearly_equal, Cs, Matrix, Ray, Shapes};
 
 pub struct Ball {
     pub cs: Cs,
@@ -14,7 +14,7 @@ impl Ball {
         Ball {
             cs,
             radius,
-            cam_to_lcs: ID_MATRIX,
+            cam_to_lcs: Matrix::default(),
         }
     }
 }

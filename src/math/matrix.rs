@@ -1,10 +1,16 @@
 use auto_ops::impl_op_ex;
 use std::fmt;
 
-use crate::{deg_to_rad, Point, Vector};
+use super::{deg_to_rad, Point, Vector, ID_MATRIX};
 
 pub struct Matrix {
     pub m: [[f64; 4]; 4],
+}
+
+impl Default for Matrix {
+    fn default() -> Self {
+        ID_MATRIX
+    }
 }
 
 impl Matrix {

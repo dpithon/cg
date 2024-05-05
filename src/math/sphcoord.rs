@@ -1,7 +1,7 @@
 use std::f64::consts::PI;
 use std::fmt;
 
-use crate::{Point, Vector};
+use super::{Point, Vector};
 
 const TWO_PI: f64 = 2. * PI;
 
