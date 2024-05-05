@@ -8,7 +8,7 @@ pub use math::{
     SphCoord, Vector, I, ID_MATRIX, J, K, O, POINT_I, POINT_J, POINT_K, VEC_0,
 };
 
-pub use pinhole::{Camera, Focale, Locked, Unlocked};
+pub use pinhole::{Camera, Focale};
 
 pub use ray::Ray;
 

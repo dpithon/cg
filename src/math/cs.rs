@@ -16,37 +16,6 @@ impl Default for Cs {
 }
 
 impl Cs {
-    fn compute_reverse_base(&mut self) {
-        //! Works only for unit vectors !
-        let i = self.get_i();
-        let j = self.get_j();
-        let k = self.get_k();
-        let o = self.get_o();
-
-        self.rcs_to_lcs = Matrix::from_lines(
-            [i.x, i.y, i.z, -i.x * o.x - i.y * o.y - i.z * o.z],
-            [j.x, j.y, j.z, -j.x * o.x - j.y * o.y - j.z * o.z],
-            [k.x, k.y, k.z, -k.x * o.x - k.y * o.y - k.z * o.z],
-            [0., 0., 0., 1.],
-        );
-    }
-
-    pub fn get_o(&self) -> Point {
-        self.lcs_to_rcs.get_o()
-    }
-
-    pub fn get_i(&self) -> Vector {
-        self.lcs_to_rcs.get_i()
-    }
-
-    pub fn get_j(&self) -> Vector {
-        self.lcs_to_rcs.get_j()
-    }
-
-    pub fn get_k(&self) -> Vector {
-        self.lcs_to_rcs.get_k()
-    }
-
     pub fn new() -> Cs {
         Cs {
             lcs_to_rcs: ID_MATRIX,
@@ -59,7 +28,7 @@ impl Cs {
     }
 
     pub fn get_matrix_to_rcs(&self) -> &Matrix {
-        &self.rcs_to_lcs
+        &self.lcs_to_rcs
     }
 
     pub fn scale(&mut self, f: f64) {
@@ -97,23 +66,7 @@ impl Cs {
         self.rcs_to_lcs = mat2;
     }
 
-    pub fn set_lcs(
-        &mut self,
-        o: &Point,
-        i: &Vector,
-        j: &Vector,
-        k: &Vector,
-    ) -> Result<(), &'static str> {
-        vector::check_base(i, j, k)?;
-
-        self.lcs_to_rcs =
-            Matrix::from_columns(i.get_quad(), j.get_quad(), k.get_quad(), o.get_quad());
-        self.compute_reverse_base();
-
-        Ok(())
-    }
-
-    pub fn complete_lcs(&mut self, o: &Point, k: &Vector) {
+    pub fn complete_cs(&mut self, o: &Point, k: &Vector) {
         assert!(nearly_equal(k.length(), 1.));
 
         if k.nearly_equal(&J) {
@@ -126,6 +79,36 @@ impl Cs {
             self.set_lcs(o, &i, &j, k).unwrap();
         }
         self.compute_reverse_base();
+    }
+
+    fn set_lcs(
+        &mut self,
+        o: &Point,
+        i: &Vector,
+        j: &Vector,
+        k: &Vector,
+    ) -> Result<(), &'static str> {
+        vector::check_base(i, j, k)?;
+
+        self.lcs_to_rcs =
+            Matrix::from_columns(i.get_quad(), j.get_quad(), k.get_quad(), o.get_quad());
+
+        Ok(())
+    }
+
+    fn compute_reverse_base(&mut self) {
+        // FIXME: Works only for unit vectors !
+        let i = self.lcs_to_rcs.get_i();
+        let j = self.lcs_to_rcs.get_j();
+        let k = self.lcs_to_rcs.get_k();
+        let o = self.lcs_to_rcs.get_o();
+
+        self.rcs_to_lcs = Matrix::from_lines(
+            [i.x, i.y, i.z, -i.x * o.x - i.y * o.y - i.z * o.z],
+            [j.x, j.y, j.z, -j.x * o.x - j.y * o.y - j.z * o.z],
+            [k.x, k.y, k.z, -k.x * o.x - k.y * o.y - k.z * o.z],
+            [0., 0., 0., 1.],
+        );
     }
 }
 
